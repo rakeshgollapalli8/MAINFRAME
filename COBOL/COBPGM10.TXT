@@ -1,0 +1,40 @@
+      *---------------------------------------------------------------
+      *--- HOW TO HANDLE DECIMAL POINT -------------------------------
+      *---------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM10.
+      *---------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *---------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       77     MKS-01        PIC 9(03)        VALUE 0.
+       77     MKS-02        PIC 9(03)        VALUE 0.
+       77     MKS-03        PIC 9(03)        VALUE 0.
+       77     TOTAL         PIC 9(03)        VALUE 0.
+       77     PERCENT       PIC 9(03).9(02).
+      *---------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *---------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ---------------------------------
+      *---------------------------------------------------------------
+       0000-MAIN-PARA.
+            DISPLAY "WELCOME TO MY PROGRAM : COBPGM10".
+            DISPLAY " ".
+
+            ACCEPT MKS-01.
+            ACCEPT MKS-02.
+            ACCEPT MKS-03.
+
+            COMPUTE TOTAL = MKS-01 + MKS-02 + MKS-03.
+            COMPUTE PERCENT = TOTAL / 3.
+
+            DISPLAY "TOTAL = ", TOTAL.
+            DISPLAY "PERCENT = ", PERCENT.
+
+            DISPLAY " ".
+            DISPLAY "THANK YOU FOR USING PROGRAM COBPGM10".
+
+            STOP RUN.
+      *---------------------------------------------------------------
+

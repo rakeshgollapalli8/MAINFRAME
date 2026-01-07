@@ -1,0 +1,195 @@
+      *----------------------------------------------------------------
+      *--- WRITE VALID RECORDS IN A KSDS FILE -------------------------
+      *--- WRITE INVALID RECORDS IN A PS FILE -------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM08.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+
+      *--- PS INPUT FILE ENTRIES --------------------------------------
+           SELECT PS-IN-FILE ASSIGN TO DD01
+           ORGANIZATION IS SEQUENTIAL
+           FILE STATUS IS FS-PS-IN.
+
+      *--- KSDS OUTPUT FILE ENTRIES -----------------------------------
+           SELECT KSDS-OUT-FILE ASSIGN TO DD02
+           ORGANIZATION IS INDEXED
+           ACCESS MODE IS RANDOM
+           RECORD KEY IS ROLL-NO-RB
+           FILE STATUS IS FS-KSDS-OUT.
+
+      *--- PS ERROR FILE ENTRIES --------------------------------------
+           SELECT PS-ERR-FILE ASSIGN TO DD03
+           ORGANIZATION IS SEQUENTIAL
+           FILE STATUS IS FS-PS-ERR.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+
+       FILE SECTION.
+       FD  PS-IN-FILE
+           LABEL RECORDS ARE STANDARD
+           RECORDING MODE IS F.
+       01  INPUT-FILE-RB.
+           05        FILLER        PIC X(80).
+
+       FD  KSDS-OUT-FILE
+           LABEL RECORDS ARE STANDARD.
+       01  OUTPUT-FILE-RB.
+           05        ROLL-NO-RB    PIC 9(03).
+           05        FILLER        PIC X(77).
+
+       FD  PS-ERR-FILE
+           LABEL RECORDS ARE STANDARD
+           RECORDING MODE IS F.
+       01  ERROR-FILE-RB.
+           05        FILLER        PIC X(80).
+
+       WORKING-STORAGE SECTION.
+       01   STUDENT-WS.
+            05     ROLL-NO-WS      PIC 9(03).
+            05     FILLER          PIC X(01).
+            05     STUD-NAME-WS    PIC X(15).
+            05     FILLER          PIC X(01).
+            05     MKS-1-WS        PIC 9(03).
+            05     FILLER          PIC X(01).
+            05     MKS-2-WS        PIC 9(03).
+            05     FILLER          PIC X(01).
+            05     MKS-3-WS        PIC 9(03).
+
+       01   OUTPUT-WS.
+            05     R-NO-WS         PIC 9(03).
+            05     FILLER          PIC X(01).
+            05     S-NAME-WS       PIC X(15).
+            05     FILLER          PIC X(01).
+            05     M-1-WS          PIC 9(03).
+            05     FILLER          PIC X(01).
+            05     M-2-WS          PIC 9(03).
+            05     FILLER          PIC X(01).
+            05     M-3-WS          PIC 9(03).
+            05     FILLER          PIC X(01).
+            05     TOTAL-WS        PIC 9(03).
+            05     FILLER          PIC X(01).
+            05     PERCENT-WS      PIC 9(03).
+
+       77           FS-PS-IN       PIC X(02)      VALUE SPACES.
+       77           FS-KSDS-OUT    PIC X(02)      VALUE SPACES.
+       77           FS-PS-ERR      PIC X(02)      VALUE SPACES.
+       77           TOTAL-RECS     PIC 9(02)      VALUE 0.
+       77           VALID-RECS     PIC 9(02)      VALUE 0.
+       77           INVALID-RECS   PIC 9(02)      VALUE 0.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : COBPGM08".
+           DISPLAY " ".
+
+           PERFORM 1000-OPEN-PARA.
+
+           READ PS-IN-FILE INTO STUDENT-WS.
+           PERFORM 2000-STUDENT-PARA UNTIL FS-PS-IN = "10".
+
+           PERFORM 3000-CLOSE-PARA.
+
+           PERFORM 4000-SHOW-STATS-PARA.
+
+           DISPLAY "THANK YOU FOR USING PROGRAM COBPGM08".
+           STOP RUN.
+      *----------------------------------------------------------------
+      *--- OPEN THE FILES ---------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           OPEN INPUT PS-IN-FILE.
+           DISPLAY "PS-IN-FILE OPEN STATUS    : ", FS-PS-IN.
+
+           OPEN OUTPUT KSDS-OUT-FILE.
+           DISPLAY "KSDS-OUT-FILE OPEN STATUS : ", FS-KSDS-OUT.
+
+           OPEN OUTPUT PS-ERR-FILE.
+           DISPLAY "PS-ERR-FILE OPEN STATUS   : ", FS-PS-ERR.
+
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS STUDENT RECORD -------------------------------------
+      *----------------------------------------------------------------
+       2000-STUDENT-PARA.
+           EVALUATE TRUE
+                WHEN ROLL-NO-WS = 0 OR STUD-NAME-WS = SPACES OR
+                     MKS-1-WS = SPACES OR MKS-2-WS = SPACES    OR
+                     MKS-3-WS = SPACES
+                         WRITE ERROR-FILE-RB FROM STUDENT-WS
+                         ADD 1 TO INVALID-RECS
+                WHEN ROLL-NO-WS IS NOT NUMERIC OR
+                     MKS-1-WS   IS NOT NUMERIC OR
+                     MKS-2-WS   IS NOT NUMERIC OR
+                     MKS-3-WS   IS NOT NUMERIC
+                         WRITE ERROR-FILE-RB FROM STUDENT-WS
+                         ADD 1 TO INVALID-RECS
+                WHEN OTHER
+                         PERFORM 2100-PROCESS-PARA
+                         WRITE OUTPUT-FILE-RB FROM OUTPUT-WS
+                         DISPLAY ROLL-NO-WS, " WRITE STATUS : ",
+                                             FS-KSDS-OUT
+                         IF FS-KSDS-OUT = "00"
+                            ADD 1 TO VALID-RECS
+                         ELSE
+                            WRITE ERROR-FILE-RB FROM STUDENT-WS
+                            ADD 1 TO INVALID-RECS
+                         END-IF
+           END-EVALUATE.
+           ADD 1 TO TOTAL-RECS.
+           READ PS-IN-FILE INTO STUDENT-WS.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PERFORM CALCULATIONS ---------------------------------------
+      *----------------------------------------------------------------
+       2100-PROCESS-PARA.
+
+      *--- MOVE DATA OF COMMON FIELDS FROM INPUT REC TO OUTPUT REC ----
+           MOVE ROLL-NO-WS    TO   R-NO-WS.
+           MOVE STUD-NAME-WS  TO   S-NAME-WS.
+           MOVE MKS-1-WS      TO   M-1-WS.
+           MOVE MKS-2-WS      TO   M-2-WS.
+           MOVE MKS-3-WS      TO   M-3-WS.
+
+      *--- CALCULATE --------------------------------------------------
+           COMPUTE TOTAL-WS   = M-1-WS + M-2-WS + M-3-WS.
+           COMPUTE PERCENT-WS = TOTAL-WS / 3.
+
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE FILE ---------------------------------------------
+      *----------------------------------------------------------------
+       3000-CLOSE-PARA.
+           DISPLAY " ".
+
+           CLOSE PS-IN-FILE.
+           DISPLAY "PS-IN-FILE CLOSE STATUS     : ", FS-PS-IN.
+
+           CLOSE KSDS-OUT-FILE.
+           DISPLAY "KSDS-OUT-FILE CLOSE STATUS  : ", FS-KSDS-OUT.
+
+           CLOSE PS-ERR-FILE.
+           DISPLAY "PS-ERR-FILE CLOSE STATUS    : ", FS-PS-ERR.
+
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- DISPLAY THE STATISTICS -------------------------------------
+      *----------------------------------------------------------------
+       4000-SHOW-STATS-PARA.
+           DISPLAY " ".
+           DISPLAY "TOTAL RECORDS PROCESSED : ", TOTAL-RECS.
+           DISPLAY "TOTAL RECORDS VALID     : ", VALID-RECS.
+           DISPLAY "TOTAL RECORDS INVALID   : ", INVALID-RECS.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *----------------------------------------------------------------
+

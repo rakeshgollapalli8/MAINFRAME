@@ -1,0 +1,11 @@
+//OZA194V    JOB  '123-WIPRO','MADHAV',TIME=(2,30),NOTIFY=&SYSUID
+//* -------------------------------------------------------------------
+//* --- DISPLAY ATTRIBUTES OF VSAM FILE -------------------------------
+//* -------------------------------------------------------------------
+//STEP01     EXEC PGM=IDCAMS
+//SYSPRINT   DD   SYSOUT=*
+//SYSIN      DD   *
+   LISTCAT ENTRIES(OZA194.WIPRO.EMP.ESDS.CLUSTER) ALL
+/*
+//* -------------------------------------------------------------------
+

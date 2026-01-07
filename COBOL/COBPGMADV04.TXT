@@ -1,0 +1,43 @@
+      *----------------------------------------------------------------
+      *---  88 LEVEL VARIABLES ----------------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM04.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+
+       WORKING-STORAGE SECTION.
+       77     CTR          PIC 9(02)        VALUE 1.
+       88     E-O-D                         VALUE 6.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : COBPGM04".
+           DISPLAY " ".
+
+           DISPLAY "AAA".
+           PERFORM 1000-PARA-1 UNTIL E-O-D.
+           DISPLAY " ".
+
+           MOVE 1 TO CTR.
+           DISPLAY "BBB".
+           PERFORM 1000-PARA-1 UNTIL E-O-D.
+           DISPLAY " ".
+
+           MOVE 1 TO CTR.
+           DISPLAY "CCC".
+           PERFORM 1000-PARA-1 UNTIL E-O-D.
+           DISPLAY " ".
+
+           DISPLAY "THANK YOU FOR USING PROGRAM COBPGM04".
+           STOP RUN.
+       1000-PARA-1.
+           DISPLAY "HELLO ", CTR.
+           COMPUTE CTR = CTR + 1.
+           EXIT.
+

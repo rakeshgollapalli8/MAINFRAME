@@ -1,0 +1,104 @@
+      *----------------------------------------------------------------
+      *--- TABLE HANDLING ---------------------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM09.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  TABLE-1.
+           05   CUSTOMER-TABLE     OCCURS 8 TIMES.
+                10   CUST-NAME     PIC A(15).
+                10   FILLER        PIC X(01).
+                10   BALANCE       PIC 9(06).
+                10   FILLER        PIC X(01).
+                10   CATEGORY      PIC X(10).
+                10   FILLER        PIC X(01).
+                10   REMARKS       PIC X(10).
+
+       77            LOCN          PIC 9(01)    VALUE 1.
+       77            TOTAL-COUNT   PIC 9(01)    VALUE 0.
+       77            VALID-COUNT   PIC 9(01)    VALUE 0.
+       77            INVALID-COUNT PIC 9(01)    VALUE 0.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : COBPGM09".
+           DISPLAY " ".
+
+           PERFORM CUSTOMER-PARA 8 TIMES.
+
+           PERFORM SHOW-STATS-PARA.
+
+           DISPLAY " ".
+           DISPLAY "THANK FOR USING PROGRAM COBPGM09".
+           STOP RUN.
+      *----------------------------------------------------------------
+      *--- PROCESS CUSTOMER DETAILS -----------------------------------
+      *----------------------------------------------------------------
+       CUSTOMER-PARA.
+           ACCEPT CUSTOMER-TABLE(LOCN).
+
+           PERFORM VALIDATE-PARA.
+
+           PERFORM PROCESS-PARA.
+
+           DISPLAY CUSTOMER-TABLE(LOCN).
+           COMPUTE LOCN = LOCN + 1.
+
+           EXIT.
+      *----------------------------------------------------------------
+      *--- VALIDATE THE INPUT -----------------------------------------
+      *----------------------------------------------------------------
+       VALIDATE-PARA.
+           EVALUATE TRUE
+                 WHEN CUST-NAME(LOCN) = SPACES OR BALANCE(LOCN) = 0
+                      MOVE "INVALID" TO REMARKS(LOCN)
+                      COMPUTE INVALID-COUNT = INVALID-COUNT + 1
+                 WHEN CUST-NAME(LOCN) IS NOT ALPHABETIC
+                      MOVE "INVALID" TO REMARKS(LOCN)
+                      COMPUTE INVALID-COUNT = INVALID-COUNT + 1
+                 WHEN BALANCE(LOCN) IS NOT NUMERIC
+                      MOVE "INVALID" TO REMARKS(LOCN)
+                      COMPUTE INVALID-COUNT = INVALID-COUNT + 1
+                 WHEN OTHER
+                      MOVE "VALID" TO REMARKS(LOCN)
+                      COMPUTE VALID-COUNT = VALID-COUNT + 1
+           END-EVALUATE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- FIND THE CATEGORY OF THE CUSTOMER --------------------------
+      *----------------------------------------------------------------
+       PROCESS-PARA.
+           IF REMARKS(LOCN) = "VALID"
+              EVALUATE TRUE
+                 WHEN BALANCE(LOCN) < 10000
+                      MOVE "REGULAR" TO CATEGORY(LOCN)
+                 WHEN BALANCE(LOCN) >= 10000 AND BALANCE(LOCN) < 100000
+                      MOVE "SILVER" TO CATEGORY(LOCN)
+                 WHEN BALANCE(LOCN) >= 100000 AND BALANCE(LOCN) < 250000
+                      MOVE "GOLD"    TO CATEGORY(LOCN)
+                 WHEN OTHER
+                      MOVE "PLATINUM" TO CATEGORY(LOCN)
+              END-EVALUATE
+           END-IF.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- DISPLAY THE STATISTICS -------------------------------------
+      *----------------------------------------------------------------
+       SHOW-STATS-PARA.
+           COMPUTE TOTAL-COUNT = VALID-COUNT + INVALID-COUNT.
+           DISPLAY " ".
+           DISPLAY "STATISTICS".
+           DISPLAY "----------".
+           DISPLAY "TOTAL RECORDS PROCESSED : ", TOTAL-COUNT.
+           DISPLAY "TOTAL VALID RECORDS     : ", VALID-COUNT.
+           DISPLAY "TOTAL INVALID RECORDS   : ", INVALID-COUNT.
+           EXIT.
+      *----------------------------------------------------------------
+

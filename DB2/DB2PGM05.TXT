@@ -1,0 +1,149 @@
+      *----------------------------------------------------------------
+      *--- CURSOR PROGRAM : COPY SPECIFIC ROWS FROM TABLE TO PS FILE --
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DB2PGM05.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT PS-FILE ASSIGN TO DD01
+           ORGANIZATION IS SEQUENTIAL
+           FILE STATUS IS FS-PS.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+
+       FILE SECTION.
+       FD  PS-FILE
+           LABEL RECORDS ARE STANDARD
+           RECORDING MODE IS F.
+       01  PS-FILE-RB.
+           05     FILLER      PIC X(80).
+
+       WORKING-STORAGE SECTION.
+       01  EMPLOYEE-WS.
+           05   EMP-NO-WS            PIC 9(04).
+           05   FILLER               PIC X(01).
+           05   EMP-NAME-WS          PIC X(15).
+           05   FILLER               PIC X(01).
+           05   PROJECT-WS           PIC X(10).
+           05   FILLER               PIC X(01).
+           05   JOIN-DATE-WS         PIC X(10).
+           05   FILLER               PIC X(01).
+           05   SALARY-EDIT-WS       PIC Z,ZZ,ZZ9.99.
+
+       77       FS-PS                PIC X(02)     VALUE SPACES.
+       77       TOTAL-RECS           PIC 9(02)     VALUE 0.
+
+           EXEC SQL
+                INCLUDE EMP194
+           END-EXEC.
+
+           EXEC SQL
+                INCLUDE SQLCA
+           END-EXEC.
+
+           EXEC SQL
+                DECLARE CUR-01 CURSOR FOR SELECT EMP_NO,
+                                                 EMP_NAME,
+                                                 PROJECT,
+                                                 JOIN_DATE,
+                                                 SALARY
+                                            FROM EMP194
+
+           END-EXEC.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO PROGRAM : DB2PGM05".
+           DISPLAY " ".
+
+           PERFORM 1000-OPEN-PARA.
+
+           PERFORM 2000-FETCH-PARA.
+           PERFORM 3000-EMPLOYEE-PARA UNTIL SQLCODE = 100.
+
+           PERFORM 4000-CLOSE-PARA.
+
+           PERFORM 5000-SHOW-STATS-PARA.
+
+           DISPLAY " ".
+           DISPLAY "THANK YOU FOR USING PROGRAM DB2PGM05".
+           GOBACK.
+      *----------------------------------------------------------------
+      *--- OPEN THE CURSOR --------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           EXEC SQL
+                OPEN CUR-01
+           END-EXEC.
+           DISPLAY "CUR-01 OPEN STATUS  : ", SQLCODE
+
+           OPEN OUTPUT PS-FILE.
+           DISPLAY "PS-FILE OPEN STATUS : ", FS-PS.
+
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- FETCH A ROW FROM CURSOR CONTROLLED TABLE -------------------
+      *----------------------------------------------------------------
+       2000-FETCH-PARA.
+           EXEC SQL
+                FETCH CUR-01 INTO :HV-EMP-NO,
+                                  :HV-EMP-NAME,
+                                  :HV-PROJECT,
+                                  :HV-JOIN-DATE,
+                                  :HV-SALARY
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS EMPLOYEE DETAILS -----------------------------------
+      *----------------------------------------------------------------
+       3000-EMPLOYEE-PARA.
+           PERFORM 3100-WRITE-PARA.
+           INITIALIZE HV-EMP-NAME, HV-PROJECT.
+           PERFORM 2000-FETCH-PARA.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- WRITE THE RECORD IN PS FILE --------------------------------
+      *----------------------------------------------------------------
+       3100-WRITE-PARA.
+      *--- MOVE DATA FROM HOST VARIABLE TO WS-RECORD-VARIABLE ---------
+           MOVE HV-EMP-NO          TO   EMP-NO-WS.
+           MOVE HV-EMP-NAME-TEXT   TO   EMP-NAME-WS.
+           MOVE HV-PROJECT-TEXT    TO   PROJECT-WS.
+           MOVE HV-JOIN-DATE       TO   JOIN-DATE-WS.
+           MOVE HV-SALARY          TO   SALARY-EDIT-WS.
+
+      *--- WRITE WS-RECORD-VARIABLE DATA TO PS FILE -------------------
+           WRITE PS-FILE-RB FROM EMPLOYEE-WS.
+           DISPLAY EMP-NO-WS, " WRITE STATUS : ", FS-PS.
+           ADD 1 TO TOTAL-RECS.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE CURSOR -------------------------------------------
+      *----------------------------------------------------------------
+       4000-CLOSE-PARA.
+           EXEC SQL
+                CLOSE CUR-01
+           END-EXEC.
+           DISPLAY " ".
+           DISPLAY "CUR-01 CLOSE STATUS  : ", SQLCODE.
+
+           CLOSE PS-FILE.
+           DISPLAY "PS-FILE CLOSE STATUS : ", FS-PS.
+           DISPLAY " ".
+
+           EXIT.
+      *----------------------------------------------------------------
+      *--- DISPLAY THE STATISTICS -------------------------------------
+      *----------------------------------------------------------------
+       5000-SHOW-STATS-PARA.
+           DISPLAY " ".
+           DISPLAY "TOTAL ROWS PROCESSED : ", TOTAL-RECS.
+           EXIT.
+      *----------------------------------------------------------------
+

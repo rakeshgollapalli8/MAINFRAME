@@ -1,0 +1,152 @@
+      *----------------------------------------------------------------
+      *--- CURSOR OPTIONS - FOR UPDATE OF/ WHERE CURRENT OF/ WITH HOLD-
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ASGN08.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       77  DATE-TODAY           PIC 9(08)     VALUE 0.
+       77  QTY-WS               PIC 9(04)     VALUE 0.
+
+           EXEC SQL
+                INCLUDE PROTRNS
+           END-EXEC.
+
+           EXEC SQL
+                INCLUDE PROMSTR
+           END-EXEC.
+
+           EXEC SQL
+                INCLUDE SQLCA
+           END-EXEC.
+
+           EXEC SQL
+                DECLARE CUR_A CURSOR WITH HOLD FOR SELECT PROD_NO,
+                                                          PROD_NAME,
+                                                          QTY,
+                                                          TRANS_TYPE,
+                                                          CURR_STOCK
+                                                     FROM PROD_TRNS
+                                            WHERE PROD_NAME IS NOT NULL
+           END-EXEC.
+
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+
+           EXEC SQL
+                DELETE FROM PROD_MSTR
+           END-EXEC.
+           EXEC SQL
+                COMMIT
+           END-EXEC.
+
+           DISPLAY "WELCOME TO MY PROGRAM : ASGN08".
+           DISPLAY " ".
+
+           PERFORM 1000-OPEN-PARA.
+
+           PERFORM 2000-FETCH-PARA.
+           PERFORM 3000-PRODDUCT-PARA UNTIL SQLCODE = 100.
+
+           PERFORM 4000-CLOSE-PARA.
+
+           DISPLAY "THANK YOU FOR USING PROGRAM ASGN08".
+           GOBACK.
+      *----------------------------------------------------------------
+      *--- OPEN THE CURSOR --------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           EXEC SQL
+                OPEN CUR_A
+           END-EXEC.
+           DISPLAY "CUR_A CURSOR OPEN STATUS : ", SQLCODE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- FETCH THE ROW FROM CURSOR CONTROLLED TABLE -----------------
+      *----------------------------------------------------------------
+       2000-FETCH-PARA.
+           EXEC SQL
+                FETCH CUR_A INTO :HV-1-PROD-NO,
+                                 :HV-1-PROD-NAME,
+                                 :HV-1-QTY,
+                                 :HV-1-TRANS-TYPE,
+                                 :HV-1-CURR-STOCK
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS PRODDUCT ROW ---------------------------------------
+      *----------------------------------------------------------------
+       3000-PRODDUCT-PARA.
+           PERFORM 3100-PROCESS-PARA.
+           PERFORM 2000-FETCH-PARA.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- UPDATE THE ROW IN CURSOR CONTROLLED TABLE ------------------
+      *----------------------------------------------------------------
+       3100-PROCESS-PARA.
+           MOVE HV-1-PROD-NO    TO  HV-2-PROD-NO
+           MOVE HV-1-PROD-NAME  TO  HV-2-PROD-NAME
+      *---------------------------------------------------------------
+           EVALUATE TRUE
+                WHEN HV-1-TRANS-TYPE = "R"
+                COMPUTE HV-2-CURR-STOCK = HV-1-CURR-STOCK + HV-1-QTY
+                WHEN HV-1-TRANS-TYPE = "S"
+                COMPUTE HV-2-CURR-STOCK = HV-1-CURR-STOCK - HV-1-QTY
+           END-EVALUATE.
+
+           EVALUATE TRUE
+                WHEN HV-2-CURR-STOCK < 10
+                    MOVE "RED"     TO HV-2-STATUS
+                WHEN HV-2-CURR-STOCK >= 10 AND <= 25
+                    MOVE "ORANGE"  TO HV-2-STATUS
+                WHEN HV-2-CURR-STOCK > 25
+                    MOVE "GREEN"   TO HV-2-STATUS
+           END-EVALUATE.
+
+           ACCEPT DATE-TODAY FROM DATE YYYYMMDD.
+           STRING DATE-TODAY(1:4) DELIMITED BY SIZE
+                  "-"             DELIMITED BY SIZE
+                  DATE-TODAY(5:2) DELIMITED BY SIZE
+                  "-"             DELIMITED BY SIZE
+                  DATE-TODAY(7:2) DELIMITED BY SIZE
+             INTO HV-2-DATE-DONE.
+
+           EXEC SQL
+            INSERT INTO PROD_MSTR VALUES(:HV-2-PROD-NO,
+                                           :HV-2-PROD-NAME,
+                                           :HV-2-CURR-STOCK,
+                                           :HV-2-STATUS,
+                                           :HV-2-DATE-DONE)
+           END-EXEC.
+           EVALUATE TRUE
+                WHEN SQLCODE = 0
+                     DISPLAY HV-1-PROD-NO, ":",  " COPIED"
+                WHEN SQLCODE = -803
+                     DISPLAY HV-1-PROD-NO, ":",  " EXISTS"
+                     DISPLAY " "
+                WHEN OTHER
+                     DISPLAY HV-1-PROD-NO, ":",
+                                " INSERT ERROR : ", SQLCODE
+
+
+           END-EVALUATE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE CURSOR--------------------------------------------
+      *----------------------------------------------------------------
+       4000-CLOSE-PARA.
+           EXEC SQL
+                CLOSE CUR_A
+           END-EXEC.
+           DISPLAY "CUR_A CURSOR CLOSE STATUS : ", SQLCODE.
+           EXIT.
+      *----------------------------------------------------------------
+

@@ -1,0 +1,85 @@
+      *----------------------------------------------------------------
+      *--- DATA VALIDATION --------------------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM07.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01   STUDENT-RECORD.
+            05     STUD-NAME     PIC A(15).
+            05     FILLER        PIC X(01).
+            05     PERCENT       PIC 9(03).
+            05     FILLER        PIC X(01).
+            05     GRADE         PIC A(06).
+            05     FILLER        PIC X(01).
+            05     REMARKS       PIC A(07).
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       MAIN-PARA.
+            DISPLAY "WELCOME TO MY PROGRAM : COBPGM07".
+            DISPLAY " ".
+
+            PERFORM STUDENT-PARA.
+
+            DISPLAY "THANK YOU FOR USING PROGRAM COBPGM07".
+            STOP RUN.
+      *----------------------------------------------------------------
+      *--- PROCESS STUDENT DETAILS ------------------------------------
+      *----------------------------------------------------------------
+       STUDENT-PARA.
+            ACCEPT STUDENT-RECORD.
+
+            PERFORM VALIDATE-PARA.
+
+            PERFORM PROCESS-PARA.
+
+            DISPLAY STUDENT-RECORD.
+            DISPLAY " ".
+            EXIT.
+      *----------------------------------------------------------------
+      *--- VALIDATE THE INPUT -----------------------------------------
+      *----------------------------------------------------------------
+       VALIDATE-PARA.
+            IF STUD-NAME = SPACES OR PERCENT = 0
+               MOVE "INVALID" TO REMARKS
+            ELSE
+               IF STUD-NAME IS NOT ALPHABETIC
+                  MOVE "INVALID" TO REMARKS
+               ELSE
+                  IF PERCENT IS NOT NUMERIC
+                     MOVE "INVALID" TO REMARKS
+                  ELSE
+                     MOVE "VALID" TO REMARKS
+                  END-IF
+               END-IF
+            END-IF.
+
+            EXIT.
+      *----------------------------------------------------------------
+      *--- FIND THE GRADE OF THE STUDENT ------------------------------
+      *----------------------------------------------------------------
+       PROCESS-PARA.
+            IF REMARKS = "VALID"
+               EVALUATE TRUE
+                    WHEN PERCENT >= 75
+                         MOVE "DISTN" TO GRADE
+                    WHEN PERCENT >= 60 AND PERCENT < 75
+                         MOVE "FIRST" TO GRADE
+                    WHEN PERCENT >= 50 AND PERCENT < 60
+                         MOVE "SECOND" TO GRADE
+                    WHEN PERCENT >= 35 AND PERCENT < 50
+                         MOVE "THIRD" TO GRADE
+                    WHEN OTHER
+                         MOVE "FAIL" TO GRADE
+               END-EVALUATE
+            END-IF.
+
+            EXIT.
+      *----------------------------------------------------------------
+

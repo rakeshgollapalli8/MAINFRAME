@@ -1,0 +1,122 @@
+      *----------------------------------------------------------------
+      *--- SEARCH A RECORD IN AIX CLUSTER HAVING DUPLICATE VALUES -----
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM12.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT KSDS-FILE ASSIGN TO DD01
+           ORGANIZATION IS INDEXED
+           ACCESS MODE IS SEQUENTIAL
+           RECORD KEY IS EMP-NO-KSDS
+           ALTERNATE RECORD KEY IS PROJECT-KSDS WITH DUPLICATES
+           FILE STATUS IS FS-KSDS.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+
+       FILE SECTION.
+       FD  KSDS-FILE
+           LABEL RECORDS ARE STANDARD.
+       01  KSDS-RB.
+           05     EMP-NO-KSDS      PIC 9(03).
+           05     FILLER           PIC X(17).
+           05     PROJECT-KSDS     PIC X(10).
+           05     FILLER           PIC X(50).
+
+       WORKING-STORAGE SECTION.
+       01  EMPLOYEE-WS.
+           05     EMP-NO-WS        PIC 9(03).
+           05     FILLER           PIC X(01).
+           05     EMP-NAME-WS      PIC X(15).
+           05     FILLER           PIC X(01).
+           05     PROJECT-WS       PIC X(10).
+           05     FILLER           PIC X(01).
+           05     MOBILE-NO-WS     PIC 9(10).
+           05     FILLER           PIC X(01).
+           05     SALARY-WS        PIC 9(06).
+
+       01  EMPLOYEE-FRM-WS.
+           05     EMP-NO-FRM-WS    PIC 9(03).
+           05     FILLER           PIC X(01).
+           05     EMP-NAME-FRM-WS  PIC X(15).
+           05     FILLER           PIC X(01).
+           05     PROJECT-FRM-WS   PIC X(10).
+           05     FILLER           PIC X(01).
+           05     MOBILE-NO-FRM-WS PIC 9(10).
+           05     FILLER           PIC X(01).
+           05     SALARY-FRM-WS    PIC Z,ZZ,ZZ9.
+
+       77         FS-KSDS          PIC X(02)     VALUE SPACES.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO COBOL PROGRAM : COBPGM12".
+           DISPLAY " ".
+
+           PERFORM 1000-OPEN-PARA.
+
+           ACCEPT PROJECT-KSDS.
+           START KSDS-FILE KEY IS = PROJECT-KSDS.
+           EVALUATE TRUE
+                WHEN FS-KSDS = "00"
+                     DISPLAY PROJECT-KSDS, " FOUND"
+                     READ KSDS-FILE INTO EMPLOYEE-WS
+                     PERFORM 2000-EMPLOYEE-PARA UNTIL FS-KSDS = "10"
+                WHEN FS-KSDS = "23"
+                     DISPLAY PROJECT-KSDS, " NOT FOUND"
+                WHEN OTHER
+                     DISPLAY PROJECT-KSDS, " START ERROR"
+           END-EVALUATE.
+
+           PERFORM 3000-CLOSE-PARA.
+
+           DISPLAY "THANK YOU FOR USING PROGRAM COBPGM12".
+           STOP RUN.
+      *----------------------------------------------------------------
+      *--- OPEN THE FILE ----------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           OPEN INPUT KSDS-FILE.
+           DISPLAY "KSDS OPEN STATUS : ", FS-KSDS.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS EMPLOYEE RECORD ------------------------------------
+      *----------------------------------------------------------------
+       2000-EMPLOYEE-PARA.
+           MOVE EMP-NO-WS    TO EMP-NO-FRM-WS
+           MOVE EMP-NAME-WS  TO EMP-NAME-FRM-WS
+           MOVE PROJECT-WS   TO PROJECT-FRM-WS
+           MOVE MOBILE-NO-WS TO MOBILE-NO-FRM-WS
+           MOVE SALARY-WS    TO SALARY-FRM-WS
+
+           INSPECT EMP-NAME-FRM-WS REPLACING ALL "-" BY " "
+           INSPECT PROJECT-FRM-WS REPLACING ALL "-" BY " "
+
+           DISPLAY EMPLOYEE-FRM-WS.
+
+           IF FS-KSDS = "02"
+              READ KSDS-FILE INTO EMPLOYEE-WS
+           ELSE
+              IF FS-KSDS = "00"
+                 MOVE "10" TO FS-KSDS
+              END-IF
+           END-IF.
+
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE FILE ---------------------------------------------
+      *----------------------------------------------------------------
+       3000-CLOSE-PARA.
+           CLOSE KSDS-FILE.
+           DISPLAY " ".
+           DISPLAY "KSDS CLOSE STATUS : ", FS-KSDS.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+

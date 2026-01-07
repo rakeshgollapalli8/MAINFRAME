@@ -1,0 +1,171 @@
+      *----------------------------------------------------------------
+      *--- CURSOR PROGRAM : COPY SPECIFIC ROWS FROM TABLE TO PS FILE --
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ASGN07.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT PS-FILE ASSIGN TO DD01
+           ORGANIZATION IS SEQUENTIAL
+           FILE STATUS IS FS-PS.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+
+       FILE SECTION.
+       FD  PS-FILE
+           LABEL RECORDS ARE STANDARD
+           RECORDING MODE IS F.
+       01  PS-FILE-RB.
+           05     FILLER      PIC X(80).
+
+       WORKING-STORAGE SECTION.
+       01  CUSTOMER-WS.
+           05   CUST_ID-WS           PIC 9(04).
+           05   FILLER               PIC X(01).
+           05   ACC_NO-WS            PIC 9(04).
+           05   FILLER               PIC X(01).
+           05   CUST_NAME-WS         PIC X(10).
+           05   FILLER               PIC X(01).
+           05   BALANCE-WS           PIC 9(09).
+           05   FILLER               PIC X(01).
+           05   STATUS-WS            PIC X(10).
+
+       77       FS-PS                PIC X(02)     VALUE SPACES.
+       77       TOTAL-RECS           PIC 9(02)     VALUE 0.
+
+           EXEC SQL
+                INCLUDE BANKTRA
+           END-EXEC.
+
+           EXEC SQL
+                INCLUDE SQLCA
+           END-EXEC.
+
+           EXEC SQL
+                DECLARE CUR-B CURSOR WITH HOLD FOR SELECT CUST_ID,
+                                                          ACC_NO,
+                                                          CUST_NAME,
+                                                          TRANS_TYPE,
+                                                          TRANS_AMT,
+                                                          BALANCE
+                                                     FROM BANK_TRANS
+
+           END-EXEC.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO PROGRAM : ASGN07".
+           DISPLAY " ".
+
+           PERFORM 1000-OPEN-PARA.
+
+           PERFORM 2000-FETCH-PARA.
+           PERFORM 3000-CUSTOMER-PARA UNTIL SQLCODE = 100.
+
+           PERFORM 4000-CLOSE-PARA.
+
+           PERFORM 5000-SHOW-STATS-PARA.
+
+           DISPLAY " ".
+           DISPLAY "THANK YOU FOR USING PROGRAM ASGN07".
+           GOBACK.
+      *----------------------------------------------------------------
+      *--- OPEN THE CURSOR --------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           EXEC SQL
+                OPEN CUR-B
+           END-EXEC.
+           DISPLAY "CUR-B OPEN STATUS  : ", SQLCODE
+
+           OPEN OUTPUT PS-FILE.
+           DISPLAY "PS-FILE OPEN STATUS : ", FS-PS.
+
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- FETCH A ROW FROM CURSOR CONTROLLED TABLE -------------------
+      *----------------------------------------------------------------
+       2000-FETCH-PARA.
+           EXEC SQL
+                FETCH CUR-B INTO :HV-T1-CUST-ID,
+                                 :HV-T1-ACC-NO,
+                                 :HV-T1-CUST-NAME,
+                                 :HV-T1-TRANS-TYPE,
+                                 :HV-T1-TRANS-AMT,
+                                 :HV-T1-BALANCE
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS CUSTOMER DETAILS -----------------------------------
+      *----------------------------------------------------------------
+       3000-CUSTOMER-PARA.
+           PERFORM 3100-WRITE-PARA.
+      *    INITIALIZE HV-STUD-NAME, HV-RESULT.
+           PERFORM 2000-FETCH-PARA.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- WRITE THE RECORD IN PS FILE --------------------------------
+      *----------------------------------------------------------------
+       3100-WRITE-PARA.
+      *--- MOVE DATA FROM HOST VARIABLE TO WS-RECORD-VARIABLE ---------
+           MOVE HV-T1-CUST-ID       TO   CUST_ID-WS.
+           MOVE HV-T1-ACC-NO        TO   ACC_NO-WS.
+           MOVE HV-T1-CUST-NAME     TO  CUST_NAME-WS.
+
+           EVALUATE TRUE
+                WHEN HV-T1-TRANS-TYPE = "D"
+                COMPUTE BALANCE-WS = HV-T1-BALANCE + HV-T1-TRANS-AMT
+                     MOVE "DEPOSIT" TO STATUS-WS
+                WHEN HV-T1-TRANS-TYPE = "W"
+                COMPUTE BALANCE-WS = HV-T1-BALANCE - HV-T1-TRANS-AMT
+                     MOVE "WITHDRAW"   TO STATUS-WS
+           END-EVALUATE.
+      *----------------------------------------------------------------
+           EVALUATE TRUE
+                WHEN SQLCODE = 0
+                    DISPLAY HV-T1-CUST-ID, ":", HV-T1-ACC-NO, " COPIED"
+                WHEN SQLCODE = -803
+                    DISPLAY HV-T1-CUST-ID, ":", HV-T1-ACC-NO, " EXISTS"
+                     DISPLAY " "
+                WHEN OTHER
+                     DISPLAY HV-T1-CUST-ID, ":", HV-T1-ACC-NO,
+                                " INSERT ERROR : ", SQLCODE
+
+
+           END-EVALUATE.
+           EXIT.
+      *--- WRITE WS-RECORD-VARIABLE DATA TO PS FILE -------------------
+           WRITE PS-FILE-RB FROM CUSTOMER-WS.
+           DISPLAY CUST_ID-WS, " WRITE STATUS : ", FS-PS.
+           ADD 1 TO TOTAL-RECS.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE CURSOR -------------------------------------------
+      *----------------------------------------------------------------
+       4000-CLOSE-PARA.
+           EXEC SQL
+                CLOSE CUR-B
+           END-EXEC.
+           DISPLAY " ".
+           DISPLAY "CUR-B  CLOSE STATUS  : ", SQLCODE.
+
+           CLOSE PS-FILE.
+           DISPLAY "PS-FILE CLOSE STATUS : ", FS-PS.
+           DISPLAY " ".
+
+           EXIT.
+      *----------------------------------------------------------------
+      *--- DISPLAY THE STATISTICS -------------------------------------
+      *----------------------------------------------------------------
+       5000-SHOW-STATS-PARA.
+           DISPLAY " ".
+           DISPLAY "TOTAL ROWS PROCESSED : ", TOTAL-RECS.
+           EXIT.
+      *----------------------------------------------------------------
+
