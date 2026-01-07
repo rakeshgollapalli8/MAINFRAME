@@ -1,0 +1,27 @@
+//OZA194J     JOB    '123-WIPRO','MADHAV',NOTIFY=&SYSUID,TIME=(2,30)
+//*-------------------------------------------------------------------
+//*--- COPY DATA FROM DATASET TO DATASET -----------------------------
+//*-------------------------------------------------------------------
+//STEP01      EXEC   PGM=IEBGENER
+//SYSPRINT    DD     SYSOUT=*
+//SYSUT1      DD     DSN=OZA194.WIPRO.CHENNAI,DISP=OLD
+//SYSUT2      DD     DSN=OZA194.WIPRO.EMPLOYEE.MASTER,DISP=OLD
+//SYSIN       DD     DUMMY
+//*-------------------------------------------------------------------
+//*--- COPY DATA FROM DATASET TO DATASET -----------------------------
+//*-------------------------------------------------------------------
+//STEP02      EXEC   PGM=IEBGENER
+//SYSPRINT    DD     SYSOUT=*
+//SYSUT1      DD     DSN=OZA194.WIPRO.BANGLOR,DISP=OLD
+//SYSUT2      DD     DSN=OZA194.WIPRO.EMPLOYEE.MASTER,DISP=MOD
+//SYSIN       DD     DUMMY
+//*-------------------------------------------------------------------
+//*--- COPY DATA FROM DATASET TO DATASET -----------------------------
+//*-------------------------------------------------------------------
+//STEP03      EXEC   PGM=IEBGENER
+//SYSPRINT    DD     SYSOUT=*
+//SYSUT1      DD     DSN=OZA194.WIPRO.PUNE,DISP=OLD
+//SYSUT2      DD     DSN=OZA194.WIPRO.EMPLOYEE.MASTER,DISP=MOD
+//SYSIN       DD     DUMMY
+//*-------------------------------------------------------------------
+

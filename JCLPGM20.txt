@@ -1,0 +1,18 @@
+//OZA194J    JOB     '123-WIPRO','MADHAV',NOTIFY=&SYSUID,TIME=(2,30)
+//* ------------------------------------------------------------------
+//* --- INSTREAM PROCEDURE : SORT UTILITY ----------------------------
+//* ------------------------------------------------------------------
+//SORTDATA   PROC
+//STEP01     EXEC    PGM=SORT
+//SYSOUT     DD      SYSOUT=*
+//SORTIN     DD      DSN=OZA194.WIPRO.EMPLOYEE.DATA,DISP=OLD
+//SORTWK01   DD      UNIT=SYSDA,SPACE=(TRK,(1,1))
+//SORTOUT    DD      SYSOUT=*
+//SYSIN      DD      DSN=OZA194.WIPRO.SORTCARD,DISP=OLD
+//           PEND
+//* ------------------------------------------------------------------
+//* --- MAIN CODE ----------------------------------------------------
+//* ------------------------------------------------------------------
+//STEPA      EXEC    PROC=SORTDATA
+//* ------------------------------------------------------------------
+

@@ -1,0 +1,11 @@
+//OZA194J   JOB     '123-WIPRO','MADHAV',NOTIFY=&SYSUID,TIME=(2,30)
+//* -------------------------------------------------------------------
+//* --- COPY DATA IN A GDS --------------------------------------------
+//* -------------------------------------------------------------------
+//STEP01    EXEC     PGM=IEBGENER
+//SYSPRINT  DD       SYSOUT=*
+//SYSUT1    DD       DSN=OZA194.WIPRO.BANKING.INPUT,DISP=OLD
+//SYSUT2    DD       DSN=OZA194.WIPRO.BANKING.GDG(-1),DISP=OLD
+//SYSIN     DD       DUMMY
+//* -------------------------------------------------------------------
+

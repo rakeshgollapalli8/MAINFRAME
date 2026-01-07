@@ -1,0 +1,38 @@
+//OZA194J    JOB   '123-WIPRO','MADHAV',NOTIFY=&SYSUID,TIME=(2,30)
+//* ------------------------------------------------------------------
+//* --- INSTREAM PROCEDURE 01 : DISPLAY BANKING RECORDS --------------
+//* ------------------------------------------------------------------
+//SHOW$BKG   PROC
+//STEP01     EXEC   PGM=IEBGENER
+//SYSPRINT   DD     SYSOUT=*
+//SYSUT1     DD     DSN='OZA194.WIPRO.BANKING',DISP=OLD
+//SYSUT2     DD     SYSOUT=*
+//SYSIN      DD     DUMMY
+//           PEND
+//* ------------------------------------------------------------------
+//* --- INSTREAM PROCEDURE 02 : DISPLAY FINANCE RECORDS --------------
+//* ------------------------------------------------------------------
+//SHOW$FIN   PROC
+//STEP01     EXEC   PGM=IEBGENER
+//SYSPRINT   DD     SYSOUT=*
+//SYSUT1     DD     DSN='OZA194.WIPRO.FINANCE',DISP=OLD
+//SYSUT2     DD     SYSOUT=*
+//SYSIN      DD     DUMMY
+//           PEND
+//* ------------------------------------------------------------------
+//* --- INSTREAM PROCEDURE 03 : DISPLAY RETAIL  RECORDS --------------
+//* ------------------------------------------------------------------
+//SHOW$RET   PROC
+//STEP01     EXEC   PGM=IEBGENER
+//SYSPRINT   DD     SYSOUT=*
+//SYSUT1     DD     DSN='OZA194.WIPRO.RETAIL',DISP=OLD
+//SYSUT2     DD     SYSOUT=*
+//SYSIN      DD     DUMMY
+//           PEND
+//* ------------------------------------------------------------------
+//* --- MAIN CODE ----------------------------------------------------
+//* ------------------------------------------------------------------
+//STEPA      EXEC   PROC=SHOW$BKG
+//STEPB      EXEC   PROC=SHOW$RET
+//* ------------------------------------------------------------------
+

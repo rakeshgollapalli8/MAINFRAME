@@ -1,0 +1,18 @@
+//OZA194J    JOB   '123-WIPRO','MADHAV',NOTIFY=&SYSUID,TIME=(2,30)
+//* ------------------------------------------------------------------
+//* --- INSTREAM PROCEDURE : SYMBOLIC PARAMETER ----------------------
+//* ------------------------------------------------------------------
+//SHOWDATA   PROC
+//STEP01     EXEC   PGM=IEBGENER
+//SYSPRINT   DD     SYSOUT=*
+//SYSUT1     DD     DSN=&FNAME,DISP=OLD
+//SYSUT2     DD     SYSOUT=*
+//SYSIN      DD     DUMMY
+//           PEND
+//* ------------------------------------------------------------------
+//* --- MAIN CODE ----------------------------------------------------
+//* ------------------------------------------------------------------
+//STEPA      EXEC   PROC=SHOWDATA,FNAME='OZA194.WIPRO.FILE01'
+//STEPB      EXEC   PROC=SHOWDATA
+//* ------------------------------------------------------------------
+
