@@ -1,0 +1,13 @@
+//OZA194J   JOB   '123-WIPRO','MADHAV',NOTIFY=&SYSUID,TIME=(2,30)
+//* -------------------------------------------------------------------
+//* --- DEFINE A GDG --------------------------------------------------
+//* -------------------------------------------------------------------
+//STEP01    EXEC   PGM=IDCAMS
+//SYSPRINT  DD     SYSOUT=*
+//SYSIN     DD     *
+      DEFINE GDG(NAME(OZA194.USERID.AGENT.GDG) -
+                 LIMIT(5) -
+                 NOEMPTY -
+                 SCRATCH)
+/*
+

@@ -1,0 +1,41 @@
+      *----------------------------------------------------------------
+      *--- SUB PROGRAM ------------------------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. SPGM02.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       LINKAGE SECTION.
+       01  DATA-RECORD.
+           05     BILL-NUMBER          PIC 9(04).
+           05     FILLER               PIC X(01).
+           05     CUST-NAME            PIC X(10).
+           05     FILLER               PIC X(01).
+           05     BILL-AMOUNT          PIC 9(06).
+           05     FILLER               PIC X(01).
+           05     DISCOUNT             PIC 9(04).
+           05     FILLER               PIC X(01).
+           05     NET-AMOUNT           PIC 9(06).
+           05     FILLER               PIC X(01).
+           05     REMARKS              PIC X(10).
+       PROCEDURE DIVISION USING DATA-RECORD.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGICS STARTS HERE ---------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+            IF BILL-NUMBER = SPACES OR CUST-NAME = SPACES OR
+                          BILL-AMOUNT = SPACES
+            MOVE "INVALID" TO REMARKS
+               ELSE
+                 IF BILL-NUMBER IS NOT NUMERIC OR
+                         BILL-AMOUNT IS NOT NUMERIC
+                  MOVE "INVALID" TO REMARKS
+                  ELSE
+                  MOVE "VALID" TO REMARKS
+              END-IF
+           END-IF.
+           EXIT PROGRAM.
+      *----------------------------------------------------------------
+

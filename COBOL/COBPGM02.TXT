@@ -1,0 +1,43 @@
+      *----------------------------------------------------------------
+      *--- FIND MAXIMUM OF TWO NUMBERS --------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM02.
+       AUTHOR. MADHAV.
+       DATE-WRITTEN. 24-07-2024.
+       DATE-COMPILED. 24-07-2024.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  NUMBER-RECORD.
+           05     NUM-1      PIC 9(03).
+           05     FILLER     PIC X(01).
+           05     NUM-2      PIC 9(03).
+           05     FILLER     PIC X(01).
+           05     MAX-NUM    PIC 9(03).
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : COBPGM02".
+           DISPLAY " ".
+
+           ACCEPT NUMBER-RECORD.
+
+           IF NUM-1 > NUM-2
+              MOVE NUM-1 TO MAX-NUM
+           ELSE
+              MOVE NUM-2 TO MAX-NUM
+           END-IF.
+
+           DISPLAY "MAXIMUM OF ", NUM-1, " AND ", NUM-2, " = ", MAX-NUM.
+           DISPLAY " ".
+
+           DISPLAY "THANK YOU FOR USING PROGRAM COBPGM02".
+           STOP RUN.
+      *----------------------------------------------------------------
+

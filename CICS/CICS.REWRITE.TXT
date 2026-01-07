@@ -1,0 +1,276 @@
+      *----------------------------------------------------------------
+      *--- STUDENT PROGRAM : REWRITE PROGRAM --------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. REWRP194.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  WS-RECORD.
+           05       ROLL-NO-WS    PIC X(04).
+           05       FILLER        PIC X(01)    VALUE SPACE.
+           05       STUD-NAME-WS  PIC X(10).
+           05       FILLER        PIC X(01)    VALUE SPACE.
+           05       MKS-1-WS      PIC 9(02).
+           05       FILLER        PIC X(01)    VALUE SPACE.
+           05       MKS-2-WS      PIC 9(02).
+           05       FILLER        PIC X(01)    VALUE SPACE.
+           05       MKS-3-WS      PIC 9(02).
+           05       FILLER        PIC X(01)    VALUE SPACE.
+           05       TOTAL-WS      PIC 9(03).
+           05       FILLER        PIC X(01)    VALUE SPACE.
+           05       PERCENT-WS    PIC 9(03).
+           05       FILLER        PIC X(01)    VALUE SPACE.
+           05       CLASS-WS      PIC X(04).
+           05       FILLER        PIC X(01)    VALUE SPACE.
+           05       GRADE-WS      PIC X(06).
+
+       01  COMMAREA-WS.
+           05       FLAG-WS       PIC X(01)           VALUE 'A'.
+
+       01  DATE-TIME-RECORD.
+           05       DATE-WS       PIC X(10)           VALUE SPACES.
+           05       TIME-WS       PIC X(08)           VALUE SPACES.
+
+       77           VALID-STATUS  PIC X(01)           VALUE 'N'.
+       77           RESP-VAR      PIC S9(08) COMP.
+
+      *--- PLUG-IN SYMBOLIC MAP ---------------------------------------
+           COPY MAPS194.
+
+      *--- PLUG-IN DFHAID - CONTAINS CODE OF AID KEYS -----------------
+           COPY DFHAID.
+
+      *--- PLUG-IN DFHBMSCA - CONTAINS CODE FOR BLINKING AND COLORS ---
+           COPY DFHBMSCA.
+
+       LINKAGE SECTION.
+      *--- COMMUNICATION AREA VARIABLE --------------------------------
+       01  DFHCOMMAREA.
+           05       FLAG-CA       PIC X(01).
+      *----------------------------------------------------------------
+
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           IF EIBCALEN = 0
+
+      *--- INITIALIZE SYMBOLIC MAP VARIABLES --------------------------
+              MOVE LOW-VALUE TO STUDMAPO
+
+      *--- DISPLAY THE MAP ON THE SCREEN ------------------------------
+              PERFORM 7000-SHOW-MAP-PARA
+
+      *--- RELEASE PROGRAM TEMPORARILY FROM THE MEMORY ----------------
+              PERFORM 8000-RELEASE-TEMP-PARA
+
+           ELSE
+
+              EVALUATE TRUE
+                 WHEN EIBAID = DFHPF1
+                      MOVE 'REWRITE PROGRAM COMPLETED !!!'    TO MESG2I
+                      PERFORM 7000-SHOW-MAP-PARA
+                      PERFORM 9000-QUIT-PARA
+                 WHEN EIBAID = DFHPF3
+                      PERFORM 1000-CAPTURE-INPUT-PARA
+                      PERFORM 2000-VALIDATE-INPUT-PARA
+                      PERFORM 3000-READ-PARA
+                      PERFORM 7000-SHOW-MAP-PARA
+                      PERFORM 8000-RELEASE-TEMP-PARA
+                 WHEN EIBAID = DFHPF5
+                      PERFORM 1000-CAPTURE-INPUT-PARA
+                      PERFORM 4000-READ-REWRITE-PARA
+                      PERFORM 7000-SHOW-MAP-PARA
+                      PERFORM 8000-RELEASE-TEMP-PARA
+                 WHEN EIBAID = DFHPF7
+                      MOVE LOW-VALUE TO STUDMAPO
+                      PERFORM 7000-SHOW-MAP-PARA
+                      PERFORM 8000-RELEASE-TEMP-PARA
+                 WHEN OTHER
+                      MOVE 'YOU HAVE PRESSED INVALID AID KEY' TO MESG2I
+                      PERFORM 7000-SHOW-MAP-PARA
+                      PERFORM 8000-RELEASE-TEMP-PARA
+              END-EVALUATE
+
+           END-IF.
+      *----------------------------------------------------------------
+      *--- CAPTURING THE INPUT FROM THE SCREEN TO I-VARIABLES ---------
+      *----------------------------------------------------------------
+       1000-CAPTURE-INPUT-PARA.
+           EXEC CICS
+                RECEIVE MAP('STUDMAP') MAPSET('MAPS194')
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- VALIDATE THE INPUT DATA ------------------------------------
+      *----------------------------------------------------------------
+       2000-VALIDATE-INPUT-PARA.
+           EVALUATE TRUE
+                WHEN ROLLNOL = 0 OR ROLLNOI = SPACES
+                     MOVE 'PLEASE ENTER ROLL NUMBER !!!'    TO MESG2I
+                     MOVE -1 TO ROLLNOL
+                     MOVE DFHBLINK TO MESG2H
+                WHEN ROLLNOI = '9999'
+                      MOVE 'REWRITE PROGRAM COMPLETED !!!'    TO MESG2I
+                      PERFORM 7000-SHOW-MAP-PARA
+                      PERFORM 9000-QUIT-PARA
+                WHEN OTHER
+                     MOVE 'Y' TO VALID-STATUS
+           END-EVALUATE.
+           IF VALID-STATUS = 'N'
+              PERFORM 6000-SHOW-MAP-CURSOR-PARA
+              PERFORM 8000-RELEASE-TEMP-PARA
+           END-IF.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- READ  THE RECORD IN KSDS FILE ------------------------------
+      *----------------------------------------------------------------
+       3000-READ-PARA.
+           EXEC CICS
+                READ  DATASET('STUD194')
+                      INTO(WS-RECORD)
+                      RIDFLD(ROLLNOI)
+                      RESP(RESP-VAR)
+           END-EXEC.
+
+           EVALUATE TRUE
+                WHEN RESP-VAR = DFHRESP(NORMAL)
+                    MOVE ROLL-NO-WS   TO   ROLLNOI
+      *             MOVE DFHPROTI     TO   ROLLNOA
+                    MOVE STUD-NAME-WS TO   NAMEI
+                    MOVE MKS-1-WS     TO   MKS1I
+                    MOVE MKS-2-WS     TO   MKS2I
+                    MOVE MKS-3-WS     TO   MKS3I
+                    MOVE TOTAL-WS     TO   TOTALI
+                    MOVE PERCENT-WS   TO   PERCENTI
+                    MOVE CLASS-WS     TO   CLASSI
+                    MOVE GRADE-WS     TO   GRADEI
+                WHEN RESP-VAR = DFHRESP(NOTFND)
+                     MOVE 'ROLL NUMBER NOT FOUND !!!'     TO MESG2I
+                WHEN RESP-VAR = DFHRESP(DISABLED)
+                     MOVE 'PLEASE ENABLE THE KSDS FILE !!!'    TO MESG2I
+                WHEN RESP-VAR = DFHRESP(NOTOPEN)
+                     MOVE 'PLEASE OPEN THE KSDS FILE !!!'      TO MESG2I
+                WHEN OTHER
+                     MOVE 'READ  ERROR !!!'                    TO MESG2I
+           END-EVALUATE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- READ AND UPDATE THE RECORD IN THE FILE ---------------------
+      *----------------------------------------------------------------
+       4000-READ-REWRITE-PARA.
+      *--- CALCULATE UPDATED TOTAL, PERCENT, CLASS, GRADE -------------
+           COMPUTE TOTALI = MKS1I + MKS2I + MKS3I.
+           COMPUTE PERCENTI = TOTALI / 3.
+           IF MKS1I >= 35 AND MKS2I >= 35 AND MKS3I >= 35
+              MOVE 'PASS' TO CLASSI
+           ELSE
+              MOVE 'FAIL' TO CLASSI
+           END-IF.
+           EVALUATE TRUE
+              WHEN CLASSI = 'PASS' AND PERCENTI >= 75
+                   MOVE 'DISTN' TO GRADEI
+                   MOVE DFHBLINK TO GRADEH
+              WHEN CLASSI = 'PASS' AND PERCENTI >= 60 AND PERCENTI < 75
+                   MOVE 'FIRST' TO GRADEI
+              WHEN CLASSI = 'PASS' AND PERCENTI >= 50 AND PERCENTI < 60
+                   MOVE 'SECOND' TO GRADEI
+              WHEN CLASSI = 'PASS' AND PERCENTI >= 35 AND PERCENTI < 50
+                   MOVE 'THIRD' TO GRADEI
+              WHEN OTHER
+                   MOVE 'FAIL' TO GRADEI
+                   MOVE DFHBLINK TO GRADEH
+                   MOVE DFHRED TO GRADEC
+           END-EVALUATE.
+
+      *--- SEARCH THE RECORD IN KSDS FILE + LOCK THE RECORD (UPDATE) --
+           EXEC CICS
+                READ  DATASET('STUD194')
+                      INTO(WS-RECORD)
+                      RIDFLD(ROLLNOI)
+                      UPDATE
+                      RESP(RESP-VAR)
+           END-EXEC.
+
+      *--- MOVE I-VARIABLES (MODIFIED DATA) TO WS-RECORD VARIABLE -----
+           MOVE ROLLNOI   TO ROLL-NO-WS.
+           MOVE NAMEI     TO STUD-NAME-WS.
+           MOVE MKS1I     TO MKS-1-WS.
+           MOVE MKS2I     TO MKS-2-WS.
+           MOVE MKS3I     TO MKS-3-WS.
+           MOVE TOTALI    TO TOTAL-WS.
+           MOVE PERCENTI  TO PERCENT-WS.
+           MOVE CLASSI    TO CLASS-WS.
+           MOVE GRADEI    TO GRADE-WS.
+
+      *--- UPDATE THE RECORD IN THE KSDS FILE -------------------------
+           EXEC CICS
+                REWRITE DATASET('STUD194')
+                        FROM(WS-RECORD)
+                        RESP(RESP-VAR)
+           END-EXEC.
+           EVALUATE TRUE
+                WHEN RESP-VAR = DFHRESP(NORMAL)
+                     MOVE 'DETAILS HAVE BEEN UPDATED !!!'      TO MESG2I
+                WHEN OTHER
+                     MOVE 'REWRITE ERROR !!!'                  TO MESG2I
+           END-EVALUATE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- DISPLAY THE MAP ON THE SCREEN WITH CURSOR OPTION -----------
+      *----------------------------------------------------------------
+       6000-SHOW-MAP-CURSOR-PARA.
+           MOVE 'OZA194'             TO   LOGIN2I.
+           MOVE 'REWRP194'           TO   PGMNAME2I.
+           EXEC CICS
+                LINK PROGRAM('CDCT194') COMMAREA(DATE-TIME-RECORD)
+           END-EXEC.
+           MOVE DATE-WS              TO   CDATE2I.
+           MOVE TIME-WS              TO   CTIME2I.
+           MOVE 'F3:QUERY'           TO   KEYF3I.
+           MOVE 'F5:UPDATE'          TO   KEYF5I.
+
+           EXEC CICS
+                SEND MAP('STUDMAP') MAPSET('MAPS194') ERASE CURSOR
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- DISPLAY THE MAP ON THE SCREEN ------------------------------
+      *----------------------------------------------------------------
+       7000-SHOW-MAP-PARA.
+           MOVE 'OZA194'             TO   LOGIN2I.
+           MOVE 'REWRP194'           TO   PGMNAME2I.
+           EXEC CICS
+                LINK PROGRAM('CDCT194') COMMAREA(DATE-TIME-RECORD)
+           END-EXEC.
+           MOVE DATE-WS              TO   CDATE2I.
+           MOVE TIME-WS              TO   CTIME2I.
+           MOVE 'F3:QUERY'           TO   KEYF3I.
+           MOVE 'F5:UPDATE'          TO   KEYF5I.
+
+           EXEC CICS
+                SEND MAP('STUDMAP') MAPSET('MAPS194') ERASE
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- RELEASE THE PROGRAM TEMPORARILY FROM THE MEMORY ------------
+      *----------------------------------------------------------------
+       8000-RELEASE-TEMP-PARA.
+           EXEC CICS
+                RETURN TRANSID('R194') COMMAREA(COMMAREA-WS)
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- RELEASE THE PROGRAM PERMANENTLY FROM THE MEMORY ------------
+      *----------------------------------------------------------------
+       9000-QUIT-PARA.
+           EXEC CICS
+                RETURN
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+

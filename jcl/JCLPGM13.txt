@@ -1,0 +1,17 @@
+//OZA194    JOB   '123-WIPRO','RAKESH',NOTIFY=&SYSUID,TIME=(2,30)
+//* -------------------------------------------------------------------
+//* --- MERGE 3 FILES INTO 1 FILE -------------------------------------
+//* -------------------------------------------------------------------
+//STEP01    EXEC  PGM=SORT
+//SYSOUT    DD    SYSOUT=*
+//SORTIN01  DD    DSN=OZA194.WIPRO.RETAIL.SORTED,DISP=OLD
+//SORTIN02  DD    DSN=OZA194.WIPRO.BANKING.SORTED,DISP=OLD
+//SORTIN03  DD    DSN=OZA194.WIPRO.FINANCE.SORTED,DISP=OLD
+//SORTWK01  DD    UNIT=SYSDA,SPACE=(TRK,(1,1))
+//SORTOUT   DD    DSN=OZA194.WIPRO.DATA,DISP=OLD
+//* --- SORT CARD -----------------------------------------------------
+//SYSIN     DD    *
+ MERGE FIELDS=(6,20,CH,A)
+/*
+//* -------------------------------------------------------------------
+

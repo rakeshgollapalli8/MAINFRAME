@@ -1,0 +1,53 @@
+-- ********************************************************************
+-- *** DROP THE TABLES ************************************************
+-- ********************************************************************
+   DROP TABLE INPUT_TABLE;
+   DROP TABLE OUTPUT_TABLE;
+   COMMIT;
+
+-- ********************************************************************
+-- *** CREATE THE INPUT TABLE AND INDEX FOR THE PRIMARY KEY ***********
+-- ********************************************************************
+   CREATE TABLE INPUT_TABLE
+        (
+            EMP_NO      SMALLINT     NOT NULL     PRIMARY KEY,
+            EMP_NAME    CHAR(10)     NOT NULL,
+            PROJECT     CHAR(10)
+        ) IN OZA194DB.OZA194TS;
+
+   CREATE UNIQUE INDEX IDX_INPUT ON INPUT_TABLE(EMP_NO);
+
+-- ********************************************************************
+-- *** CREATE THE OUTPUT TABLE AND INDEX FOR THE PRIMARY KEY **********
+-- ********************************************************************
+   CREATE TABLE OUTPUT_TABLE
+        (
+            EMP_NO      SMALLINT     NOT NULL     PRIMARY KEY,
+            EMP_NAME    CHAR(10)     NOT NULL,
+            PROJECT     CHAR(10)
+        ) IN OZA194DB.OZA194TS;
+
+   CREATE UNIQUE INDEX IDX_OUTPUT ON OUTPUT_TABLE(EMP_NO);
+
+   COMMIT;
+
+-- ********************************************************************
+-- *** INSERT ROWS IN INPUT TABLE *************************************
+-- ********************************************************************
+   INSERT INTO INPUT_TABLE VALUES(101,'ASHOK','BANKING');
+   INSERT INTO INPUT_TABLE VALUES(102,'PARESH','FINANCE');
+   INSERT INTO INPUT_TABLE VALUES(103,'VINOD',NULL);
+   INSERT INTO INPUT_TABLE VALUES(104,'RAJ','BANKING');
+   INSERT INTO INPUT_TABLE VALUES(105,'DINESH','FINANCE');
+   INSERT INTO INPUT_TABLE VALUES(106,'RAJENDRA',NULL);
+   INSERT INTO INPUT_TABLE VALUES(107,'AKASH','BANKING');
+   INSERT INTO INPUT_TABLE VALUES(108,'VIJAY','FINANCE');
+   INSERT INTO INPUT_TABLE VALUES(109,'ARUN',NULL);
+   INSERT INTO INPUT_TABLE VALUES(110,'VIKAS','BANKING');
+
+-- ********************************************************************
+-- *** DISPLAY ROWS FROM INPUT TABLE AND OUTPUT TABLE *****************
+-- ********************************************************************
+   SELECT * FROM INPUT_TABLE;
+   SELECT * FROM OUTPUT_TABLE;
+

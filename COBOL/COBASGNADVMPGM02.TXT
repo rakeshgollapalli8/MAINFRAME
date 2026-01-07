@@ -1,0 +1,51 @@
+      *----------------------------------------------------------------
+      *--- MAIN PROGRAM -----------------------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. MPGM02.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  CUSTOMER-RECORD.
+           05     BILL-NUMBER          PIC 9(04).
+           05     FILLER               PIC X(01).
+           05     CUST-NAME            PIC X(10).
+           05     FILLER               PIC X(01).
+           05     BILL-AMOUNT          PIC 9(06).
+           05     FILLER               PIC X(01).
+           05     DISCOUNT             PIC 9(04).
+           05     FILLER               PIC X(01).
+           05     NET-AMOUNT           PIC 9(06).
+           05     FILLER               PIC X(01).
+           05     REMARKS              PIC X(10).
+
+       77         PGM-NAME             PIC X(08).
+       77         PGM1-NAME            PIC X(08).
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : MPGM02".
+           DISPLAY " ".
+
+           ACCEPT CUSTOMER-RECORD.
+
+           MOVE "SPGM02" TO PGM-NAME.
+           CALL PGM-NAME USING CUSTOMER-RECORD.
+           IF REMARKS = "VALID"
+            MOVE "SPGM03" TO PGM1-NAME
+            CALL PGM1-NAME USING CUSTOMER-RECORD
+           ELSE
+            DISPLAY "RECORD IS INVALID"
+           END-IF.
+           DISPLAY CUSTOMER-RECORD.
+
+           DISPLAY " ".
+           DISPLAY "THANK YOU FOR USING PROGRAM MPGM15".
+           STOP RUN.
+      *----------------------------------------------------------------
+

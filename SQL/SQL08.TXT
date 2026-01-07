@@ -1,0 +1,42 @@
+-- ********************************************************************
+-- *** DROP THE TABLE
+-- ********************************************************************
+   DROP TABLE CUSTOMER;
+   COMMIT;
+
+-- ********************************************************************
+-- *** CREATE THE TABLE AND INDEX FOR PRIMARY KEY
+-- ********************************************************************
+   CREATE TABLE CUSTOMER
+        (
+            CUST_ID     SMALLINT        NOT NULL,
+            BILL_NO     SMALLINT        NOT NULL,
+            CUST_NAME   CHAR(10)        NOT NULL,
+            BILL_AMT    DECIMAL(7,2)    NOT NULL,
+            AMT_PAID    DECIMAL(7,2)    NOT NULL,
+            STATUS      CHAR(10),
+            PRIMARY KEY(CUST_ID,BILL_NO)
+        ) IN OZA194DB.OZA194TS;
+   CREATE UNIQUE INDEX IDX_08 ON CUSTOMER(CUST_ID,BILL_NO);
+   COMMIT;
+
+-- ********************************************************************
+-- *** INSERT ROWS IN THE TABLE
+-- ********************************************************************
+   INSERT INTO CUSTOMER VALUES(5001,1001,'ASHOK',5000,5000,NULL);
+   INSERT INTO CUSTOMER VALUES(5002,1002,'PARESH',7000,3200,NULL);
+   INSERT INTO CUSTOMER VALUES(5003,1003,'VINOD',12500,0,NULL);
+   INSERT INTO CUSTOMER VALUES(5004,1004,'RAM',10000,6000,NULL);
+   INSERT INTO CUSTOMER VALUES(5005,1005,'ROHIT',8000,3000,NULL);
+   INSERT INTO CUSTOMER VALUES(5001,2001,'AAKASH',11000,7000,NULL);
+   INSERT INTO CUSTOMER VALUES(5002,2002,'VIJAY',6000,6000,NULL);
+   INSERT INTO CUSTOMER VALUES(5003,2003,'ARUN',9500,0,NULL);
+   INSERT INTO CUSTOMER VALUES(5004,2004,'TIM',8750,6000,NULL);
+   INSERT INTO CUSTOMER VALUES(5005,2005,'AJAY',525,525,NULL);
+   COMMIT;
+
+-- ********************************************************************
+-- *** DISPLAY ALL ROWS OF THE TABLE
+-- ********************************************************************
+   SELECT * FROM CUSTOMER;
+
