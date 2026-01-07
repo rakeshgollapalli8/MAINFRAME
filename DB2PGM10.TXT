@@ -1,0 +1,124 @@
+      *----------------------------------------------------------------
+      *--- CURSOR OPTIONS - FOR UPDATE OF/ WHERE CURRENT OF/ WITH HOLD-
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DB2PGM10.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+           EXEC SQL
+                INCLUDE CUSTOMER
+           END-EXEC.
+
+           EXEC SQL
+                INCLUDE SQLCA
+           END-EXEC.
+
+           EXEC SQL
+                DECLARE CUR_A CURSOR WITH HOLD FOR SELECT CUST_ID,
+                                                          BILL_NO,
+                                                          CUST_NAME,
+                                                          BILL_AMT,
+                                                          AMT_PAID,
+                                                          STATUS
+                                                     FROM CUSTOMER
+                                            FOR UPDATE OF STATUS
+           END-EXEC.
+
+       77  STATUS-IV                    PIC S9(04) COMP.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : DB2PGM10".
+           DISPLAY " ".
+
+           PERFORM 1000-OPEN-PARA.
+
+           PERFORM 2000-FETCH-PARA.
+           PERFORM 3000-CUSTOMER-PARA UNTIL SQLCODE = 100.
+
+           PERFORM 4000-CLOSE-PARA.
+
+           DISPLAY "THANK YOU FOR USING PROGRAM DB2PGM10".
+           GOBACK.
+      *----------------------------------------------------------------
+      *--- OPEN THE CURSOR --------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           EXEC SQL
+                OPEN CUR_A
+           END-EXEC.
+           DISPLAY "CUR_A CURSOR OPEN STATUS : ", SQLCODE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- FETCH THE ROW FROM CURSOR CONTROLLED TABLE -----------------
+      *----------------------------------------------------------------
+       2000-FETCH-PARA.
+           EXEC SQL
+                FETCH CUR_A INTO :HV-CUST-ID,
+                                 :HV-BILL-NO,
+                                 :HV-CUST-NAME,
+                                 :HV-BILL-AMT,
+                                 :HV-AMT-PAID,
+                                 :HV-STATUS:STATUS-IV
+           END-EXEC.
+           DISPLAY HV-CUST-ID, ":", HV-BILL-NO, " FETCH STATUS : ",
+                                                SQLCODE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS CUSTOMER ROW ---------------------------------------
+      *----------------------------------------------------------------
+       3000-CUSTOMER-PARA.
+           PERFORM 3100-PROCESS-PARA.
+           PERFORM 2000-FETCH-PARA.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- UPDATE THE ROW IN CURSOR CONTROLLED TABLE ------------------
+      *----------------------------------------------------------------
+       3100-PROCESS-PARA.
+           EVALUATE TRUE
+                WHEN HV-AMT-PAID = HV-BILL-AMT
+                     MOVE 'FULLY PAID' TO HV-STATUS
+                     MOVE 0            TO STATUS-IV
+                WHEN HV-AMT-PAID = 0
+                     MOVE 'NOT PAID'   TO HV-STATUS
+                     MOVE 0            TO STATUS-IV
+                WHEN HV-AMT-PAID < HV-BILL-AMT
+                     MOVE 'PART PAID'  TO HV-STATUS
+                     MOVE 0            TO STATUS-IV
+           END-EVALUATE.
+
+           EXEC SQL
+                UPDATE CUSTOMER SET STATUS = :HV-STATUS:STATUS-IV
+                                 WHERE CURRENT OF CUR_A
+           END-EXEC.
+           EVALUATE TRUE
+                WHEN SQLCODE = 0
+                     DISPLAY HV-CUST-ID, ":", HV-BILL-NO, " UPDATED"
+                     EXEC SQL
+                          COMMIT
+                     END-EXEC
+                     DISPLAY HV-CUST-ID, ":", HV-BILL-NO, " COMMITTED"
+                     DISPLAY " "
+                WHEN OTHER
+                     DISPLAY HV-CUST-ID, ":", HV-BILL-NO,
+                                         " UPDATE ERROR : ", SQLCODE
+           END-EVALUATE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE CURSOR--------------------------------------------
+      *----------------------------------------------------------------
+       4000-CLOSE-PARA.
+           EXEC SQL
+                CLOSE CUR_A
+           END-EXEC.
+           DISPLAY "CUR_A CURSOR CLOSE STATUS : ", SQLCODE.
+           EXIT.
+      *----------------------------------------------------------------
+

@@ -1,0 +1,33 @@
+-- ********************************************************************
+-- *** DROP A TABLE
+-- ********************************************************************
+-- DROP TABLE STUD_TBL;
+-- COMMIT;
+
+-- ********************************************************************
+-- *** CREATE A TABLE
+-- ********************************************************************
+   CREATE TABLE STUD_TBL
+     (
+         ROLL_NO       SMALLINT      NOT NULL      PRIMARY KEY,
+         STUD_NAME     CHAR(10)      NOT NULL,
+         MKS_1         SMALLINT      NOT NULL,
+         MKS_2         SMALLINT      NOT NULL,
+         MKS_3         SMALLINT      NOT NULL,
+         TOTAL         SMALLINT      NOT NULL,
+         PERCENT       SMALLINT      NOT NULL,
+         CLASS         CHAR(04)      NOT NULL,
+         GRADE         CHAR(06)      NOT NULL
+     ) IN OZA194DB.OZA194TS;
+
+-- ********************************************************************
+-- *** CREATE AN INDEX FOR PRIMARY KEY
+-- ********************************************************************
+   CREATE UNIQUE INDEX IDX_B  ON STUD_TBL(ROLL_NO);
+   COMMIT;
+
+-- ********************************************************************
+-- *** DISPLAY ALL ROWS OF THE TABLE
+-- ********************************************************************
+   SELECT * FROM STUD_TBL;
+

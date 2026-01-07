@@ -1,0 +1,137 @@
+      *----------------------------------------------------------------
+      *--- CURSOR OPTIONS - FOR UPDATE OF/ WHERE CURRENT OF/ WITH HOLD-
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ASGN06.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+           EXEC SQL
+                INCLUDE BANTRAN
+           END-EXEC.
+
+           EXEC SQL
+                INCLUDE BANMAST
+           END-EXEC.
+
+           EXEC SQL
+                INCLUDE SQLCA
+           END-EXEC.
+
+           EXEC SQL
+                DECLARE CUR_A CURSOR WITH HOLD FOR SELECT CUST_ID,
+                                                          ACC_NO,
+                                                          CUST_NAME,
+                                                          TRANS_TYPE,
+                                                          TRANS_AMT,
+                                                          BALANCE
+                                                     FROM BANK_TRANS
+           END-EXEC.
+
+       77  BALANCE-IV                    PIC S9(04) COMP.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+
+           EXEC SQL
+                DELETE FROM BANK_MASTER
+           END-EXEC.
+           EXEC SQL
+                COMMIT
+           END-EXEC.
+
+           DISPLAY "WELCOME TO MY PROGRAM : ASGN06".
+           DISPLAY " ".
+
+           PERFORM 1000-OPEN-PARA.
+
+           PERFORM 2000-FETCH-PARA.
+           PERFORM 3000-CUSTOMER-PARA UNTIL SQLCODE = 100.
+
+           PERFORM 4000-CLOSE-PARA.
+
+           DISPLAY "THANK YOU FOR USING PROGRAM ASGN06".
+           GOBACK.
+      *----------------------------------------------------------------
+      *--- OPEN THE CURSOR --------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           EXEC SQL
+                OPEN CUR_A
+           END-EXEC.
+           DISPLAY "CUR_A CURSOR OPEN STATUS : ", SQLCODE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- FETCH THE ROW FROM CURSOR CONTROLLED TABLE -----------------
+      *----------------------------------------------------------------
+       2000-FETCH-PARA.
+           EXEC SQL
+                FETCH CUR_A INTO :HV-T-CUST-ID,
+                                 :HV-T-ACC-NO,
+                                 :HV-T-CUST-NAME,
+                                 :HV-T-TRANS-TYPE,
+                                 :HV-T-TRANS-AMT,
+                                 :HV-T-BALANCE:BALANCE-IV
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS CUSTOMER ROW ---------------------------------------
+      *----------------------------------------------------------------
+       3000-CUSTOMER-PARA.
+           PERFORM 3100-PROCESS-PARA.
+           PERFORM 2000-FETCH-PARA.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- UPDATE THE ROW IN CURSOR CONTROLLED TABLE ------------------
+      *----------------------------------------------------------------
+       3100-PROCESS-PARA.
+           MOVE HV-T-CUST-ID    TO  HV-M-CUST-ID
+           MOVE HV-T-ACC-NO     TO  HV-M-ACC-NO
+           MOVE HV-T-CUST-NAME  TO  HV-M-CUST-NAME
+      *---------------------------------------------------------------
+           EVALUATE TRUE
+                WHEN HV-T-TRANS-TYPE = "D"
+                COMPUTE HV-M-BALANCE = HV-T-BALANCE + HV-T-TRANS-AMT
+                     MOVE "DEPOSIT" TO HV-M-STATUS
+                WHEN HV-T-TRANS-TYPE = "W"
+                COMPUTE HV-M-BALANCE = HV-T-BALANCE - HV-T-TRANS-AMT
+                     MOVE "WITHDRAW"   TO HV-M-STATUS
+           END-EVALUATE.
+
+           EXEC SQL
+            INSERT INTO BANK_MASTER VALUES(:HV-M-CUST-ID,
+                                           :HV-M-ACC-NO,
+                                           :HV-M-CUST-NAME,
+                                           :HV-M-BALANCE,
+                                           :HV-M-STATUS)
+           END-EXEC.
+           EVALUATE TRUE
+                WHEN SQLCODE = 0
+                     DISPLAY HV-T-CUST-ID, ":", HV-T-ACC-NO, " COPIED"
+                WHEN SQLCODE = -803
+                     DISPLAY HV-T-CUST-ID, ":", HV-T-ACC-NO, " EXISTS"
+                     DISPLAY " "
+                WHEN OTHER
+                     DISPLAY HV-T-CUST-ID, ":", HV-T-ACC-NO,
+                                " INSERT ERROR : ", SQLCODE
+
+
+           END-EVALUATE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE CURSOR--------------------------------------------
+      *----------------------------------------------------------------
+       4000-CLOSE-PARA.
+           EXEC SQL
+                CLOSE CUR_A
+           END-EXEC.
+           DISPLAY "CUR_A CURSOR CLOSE STATUS : ", SQLCODE.
+           EXIT.
+      *----------------------------------------------------------------
+

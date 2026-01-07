@@ -1,0 +1,47 @@
+//OZA194V    JOB  '123-WIPRO','MADHAV',TIME=(2,30),NOTIFY=&SYSUID,
+// RESTART=STEP02
+//* -------------------------------------------------------------------
+//* --- DELETE ESDS CLUSTER -------------------------------------------
+//* -------------------------------------------------------------------
+//STEP01     EXEC PGM=IDCAMS
+//SYSPRINT   DD   SYSOUT=*
+//SYSIN      DD   *
+     DELETE OZA194.WIPRO.STUD.ESDS.CLUSTER
+/*
+//* -------------------------------------------------------------------
+//* --- DEFINE ESDS CLUSTER -------------------------------------------
+//* -------------------------------------------------------------------
+//STEP02     EXEC PGM=IDCAMS
+//SYSPRINT   DD   SYSOUT=*
+//SYSIN      DD   *
+    DEFINE CLUSTER(NAME(OZA194.WIPRO.STUD.ESDS.CLUSTER) -
+                   VOLUMES(USR002) -
+                   NONINDEXED -
+                   TRACKS(10,7) -
+                   RECORDSIZE(80 80) -
+                   REUSE) -
+              DATA(NAME(OZA194.WIPRO.STUD.ESDS.DATA))
+/*
+//* -------------------------------------------------------------------
+//* --- COPY RECORDS FROM PS FILE TO ESDS FILE ------------------------
+//* -------------------------------------------------------------------
+//STEP03     EXEC PGM=IDCAMS
+//SYSPRINT   DD   SYSOUT=*
+//DD01       DD   DSN=OZA194.WIPRO.FILE01,DISP=OLD
+//DD02       DD   DSN=OZA194.WIPRO.EMP.ESDS.CLUSTER,DISP=OLD
+//SYSIN      DD   *
+    REPRO INFILE(DD01)  OUTFILE(DD02)  REUSE
+/*
+//* -------------------------------------------------------------------
+//* --- DISPLAY ESDS FILE CONTENTS IN SPOOL ---------------------------
+//* -------------------------------------------------------------------
+//STEP04     EXEC PGM=IDCAMS
+//SYSPRINT   DD   SYSOUT=*
+//DD01       DD   DSN=OZA194.WIPRO.EMP.ESDS.CLUSTER,DISP=OLD
+//DD02       DD   SYSOUT=*
+//SYSIN      DD   *
+   REPRO  INFILE(DD01) OUTFILE(DD02) REUSE -
+          FROMADDRESS(320) TOADDRESS(560)
+/*
+//* -------------------------------------------------------------------
+

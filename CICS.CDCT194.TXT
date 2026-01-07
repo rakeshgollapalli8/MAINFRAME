@@ -1,0 +1,37 @@
+      *----------------------------------------------------------------
+      *---  SUB-PROGRAM TO CAPTURE CURRENT DATE AND TIME --------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CDCT194.
+       AUTHOR. MADHAV.
+       DATE-WRITTEN. 23-OCT-2023.
+       DATE-COMPILED. 23-OCT-2023.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       77   DATE-TIME-WS        PIC S9(15) COMP-3.
+
+       LINKAGE SECTION.
+       01   DFHCOMMAREA.
+            05   CURR-DATE           PIC X(10).
+            05   CURR-TIME           PIC X(08).
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- SUB PROGRAM LOGIC STARTS HERE ------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           EXEC CICS
+                ASKTIME ABSTIME(DATE-TIME-WS)
+           END-EXEC.
+           EXEC CICS
+                FORMATTIME ABSTIME(DATE-TIME-WS)
+                           DDMMYYYY(CURR-DATE) DATESEP('-')
+                           TIME(CURR-TIME)     TIMESEP(':')
+           END-EXEC.
+           EXEC CICS
+                RETURN
+           END-EXEC.
+

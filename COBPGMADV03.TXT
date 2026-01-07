@@ -1,0 +1,135 @@
+      *----------------------------------------------------------------
+      *---  DISPLAY ALL RECORDS FROM PS FILE TO SPOOL -----------------
+      *---  VALIDATE THE INPUT RECORDS --------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM03.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+      *--- PS-FILE ENTRIES --------------------------------------------
+           SELECT PS-FILE ASSIGN TO DD01
+           ORGANIZATION IS SEQUENTIAL
+           FILE STATUS IS FS-PS.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+
+       FILE SECTION.
+       FD  PS-FILE
+           LABEL RECORDS ARE STANDARD
+           RECORDING MODE IS F.
+       01  EMPLOYEE-RB.
+           05    EMP-NAME-RB   PIC A(20).
+           05    FILLER        PIC X(01).
+           05    BASIC-SAL-RB  PIC 9(06).9(02).
+           05    FILLER        PIC X(50).
+
+       WORKING-STORAGE SECTION.
+       01  EMPLOYEE-WS.
+           05    EMP-NAME-WS   PIC A(20).
+           05    FILLER        PIC X(01).
+           05    BASIC-SAL-WS  PIC 9(06).9(02).
+
+       77        FS-PS         PIC X(02)         VALUE SPACES.
+       77        F-NAME        PIC X(10)         VALUE SPACES.
+       77        M-NAME        PIC X(10)         VALUE SPACES.
+       77        S-NAME        PIC X(10)         VALUE SPACES.
+       77        VALID-RECS    PIC 9(02)         VALUE ZERO.
+       77        INVALID-RECS  PIC 9(02)         VALUE ZERO.
+       77        TOTAL-RECS    PIC 9(02)         VALUE ZERO.
+       77        BASIC-SAL-V   PIC 9(06)V9(02)   VALUE 0.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : COBPGM03".
+           DISPLAY " ".
+
+           PERFORM 1000-OPEN-PARA.
+
+      *--- READ THE FIRST RECORD FROM THE FILE ------------------------
+           READ PS-FILE INTO EMPLOYEE-WS.
+           PERFORM 2000-EMPLOYEE-PARA UNTIL FS-PS = "10".
+
+           PERFORM 3000-CLOSE-PARA.
+
+           PERFORM 4000-SHOW-STATS-PARA.
+
+           DISPLAY "THANK YOU FOR USING PROGRAM COBPGM03".
+           STOP RUN.
+      *----------------------------------------------------------------
+      *--- OPEN THE FILE ----------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           OPEN INPUT PS-FILE.
+           DISPLAY "PS-FILE OPEN STATUS : ", FS-PS.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS EMPLOYEE RECORD ------------------------------------
+      *----------------------------------------------------------------
+       2000-EMPLOYEE-PARA.
+
+           INSPECT EMP-NAME-WS REPLACING ALL "-" BY " ".
+
+           MOVE BASIC-SAL-WS(1:6) TO BASIC-SAL-V(1:6)
+           MOVE BASIC-SAL-WS(8:2) TO BASIC-SAL-V(7:2)
+
+           IF EMP-NAME-WS = SPACES OR BASIC-SAL-V = 0
+              DISPLAY "INVALID -> ", EMPLOYEE-WS
+              COMPUTE INVALID-RECS = INVALID-RECS + 1
+           ELSE
+              IF EMP-NAME-WS IS NOT ALPHABETIC OR
+                 BASIC-SAL-V IS NOT NUMERIC
+                      DISPLAY "INVALID -> ", EMPLOYEE-WS
+                      COMPUTE INVALID-RECS = INVALID-RECS + 1
+              ELSE
+                 PERFORM 2100-FORMAT-PARA
+                 DISPLAY "VALID.. -> ", EMPLOYEE-WS
+                 COMPUTE VALID-RECS = VALID-RECS + 1
+              END-IF
+           END-IF.
+           COMPUTE TOTAL-RECS = TOTAL-RECS + 1.
+
+      *--- READ NEXT RECORD FROM THE FILE -----------------------------
+           READ PS-FILE INTO EMPLOYEE-WS.
+
+           EXIT.
+      *----------------------------------------------------------------
+      *--- FORMAT THE NAME --------------------------------------------
+      *----------------------------------------------------------------
+       2100-FORMAT-PARA.
+           UNSTRING EMP-NAME-WS DELIMITED BY SPACE
+               INTO F-NAME, M-NAME, S-NAME.
+
+           STRING S-NAME DELIMITED BY SPACE
+                  " "    DELIMITED BY SIZE
+                  F-NAME DELIMITED BY SPACE
+                  " "    DELIMITED BY SIZE
+                  M-NAME DELIMITED BY SPACE
+             INTO EMP-NAME-WS.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE FILE ---------------------------------------------
+      *----------------------------------------------------------------
+       3000-CLOSE-PARA.
+           CLOSE PS-FILE.
+           DISPLAY " ".
+           DISPLAY "PS-FILE CLOSE STATUS    : ", FS-PS.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- DISPLAY THE STATISTICS -------------------------------------
+      *----------------------------------------------------------------
+       4000-SHOW-STATS-PARA.
+           DISPLAY " ".
+           DISPLAY "TOTAL RECORDS PROCESSED : ", TOTAL-RECS.
+           DISPLAY "TOTAL RECORDS VALID     : ", VALID-RECS.
+           DISPLAY "TOTAL RECORDS INVALID   : ", INVALID-RECS.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+

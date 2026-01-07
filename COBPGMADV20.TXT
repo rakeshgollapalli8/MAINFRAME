@@ -1,0 +1,43 @@
+      *----------------------------------------------------------------
+      *--- HOW TO IDENTIFY SOURCE OF S0C7 ABEND -----------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM20.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01   NUMBER-RECORD.
+            05       VAR-1          PIC 9(03).
+            05       FILLER         PIC X(01).
+            05       VAR-2          PIC 9(03).
+            05       FILLER         PIC X(01).
+            05       VAR-3          PIC 9(03).
+            05       FILLER         PIC X(01).
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+            DISPLAY "WELCOME TO MY PROGRAM : COBPGM20".
+            DISPLAY " ".
+
+            ACCEPT NUMBER-RECORD.
+
+            COMPUTE VAR-1 = VAR-1 + 5.
+            DISPLAY "VAR-1 = ", VAR-1.
+
+            COMPUTE VAR-2 = VAR-2 + 10.
+            DISPLAY "VAR-2 = ", VAR-2.
+
+            COMPUTE VAR-3 = VAR-3 + 15.
+            DISPLAY "VAR-3 = ", VAR-3.
+
+            DISPLAY " ".
+            DISPLAY "THANK YOU FOR USING PROGRAM COBPGM20".
+            GOBACK.
+      *----------------------------------------------------------------
+      *----------------------------------------------------------------
+

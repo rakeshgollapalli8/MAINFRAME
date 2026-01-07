@@ -1,0 +1,43 @@
+      *----------------------------------------------------------------
+      *--- PERFORM ... UNTIL ------------------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM13.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01    NUMBER-RECORD.
+             05       NUM-1      PIC  9(04).
+             05       FILLER     PIC  X(01).
+             05       NUM-2      PIC  9(04).
+             05       FILLER     PIC  X(01).
+             05       RESULT     PIC  9(05).
+
+       77             CTR        PIC  9(01)    VALUE 1.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : COBPGM13".
+           DISPLAY " ".
+
+           PERFORM 1000-ADD-PARA UNTIL CTR = 6.
+
+           DISPLAY " ".
+           DISPLAY "THANK YOU FOR USING PROGRAM COBPGM13".
+           STOP RUN.
+      *----------------------------------------------------------------
+      *--- ADD TWO NUMBER AND DISPLAY THE SUM -------------------------
+      *----------------------------------------------------------------
+       1000-ADD-PARA.
+           ACCEPT NUMBER-RECORD.
+           COMPUTE RESULT = NUM-1 + NUM-2.
+           DISPLAY NUMBER-RECORD.
+           COMPUTE CTR = CTR + 1.
+           EXIT.
+      *----------------------------------------------------------------
+

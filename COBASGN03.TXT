@@ -1,0 +1,84 @@
+      *---------------------------------------------------------------- 00010000
+      *--- DATA VALIDATION -------------------------------------------- 00020000
+      *---------------------------------------------------------------- 00030000
+       IDENTIFICATION DIVISION.                                         00040000
+       PROGRAM-ID. assign03.                                            00050000
+      *---------------------------------------------------------------- 00060000
+       ENVIRONMENT DIVISION.                                            00070000
+      *---------------------------------------------------------------- 00080000
+       DATA DIVISION.                                                   00090000
+       WORKING-STORAGE SECTION.                                         00100000
+       01   STUDENT-RECORD.                                             00110000
+            05     STUD-NAME     PIC A(15).                             00120000
+            05     FILLER        PIC X(01).                             00130000
+            05     PERCENT       PIC 9(03).                             00140000
+            05     FILLER        PIC X(01).                             00150000
+            05     GRADE         PIC A(06).                             00160000
+            05     FILLER        PIC X(01).                             00170000
+            05     REMARKS       PIC A(07).                             00180000
+      *---------------------------------------------------------------- 00190000
+       PROCEDURE DIVISION.                                              00200000
+      *---------------------------------------------------------------- 00210000
+      *--- PROGRAM LOGIC STARTS HERE ---------------------------------- 00220000
+      *---------------------------------------------------------------- 00230000
+       MAIN-PARA.                                                       00240000
+            DISPLAY "WELCOME TO MY PROGRAM : COBPGM07".                 00250000
+            DISPLAY " ".                                                00260000
+                                                                        00270000
+            PERFORM STUDENT-PARA.                                       00280000
+                                                                        00290000
+            DISPLAY "THANK YOU FOR USING PROGRAM COBPGM07".             00300000
+            STOP RUN.                                                   00310000
+      *---------------------------------------------------------------- 00320000
+      *--- PROCESS STUDENT DETAILS ------------------------------------ 00330000
+      *---------------------------------------------------------------- 00340000
+       STUDENT-PARA.                                                    00350000
+            ACCEPT STUDENT-RECORD.                                      00360000
+                                                                        00370000
+            PERFORM VALIDATE-PARA.                                      00380000
+                                                                        00390000
+            PERFORM PROCESS-PARA.                                       00400000
+                                                                        00410000
+            DISPLAY STUDENT-RECORD.                                     00420000
+            DISPLAY " ".                                                00430000
+            EXIT.                                                       00440000
+      *---------------------------------------------------------------- 00450000
+      *--- VALIDATE THE INPUT ----------------------------------------- 00460000
+      *---------------------------------------------------------------- 00470000
+       VALIDATE-PARA.                                                   00480000
+            IF STUD-NAME = SPACES OR PERCENT = 0                        00490000
+               MOVE "INVALID" TO REMARKS                                00500000
+            ELSE                                                        00510000
+               IF STUD-NAME IS NOT ALPHABETIC                           00520000
+                  MOVE "INVALID" TO REMARKS                             00530000
+               ELSE                                                     00540000
+                  IF PERCENT IS NOT NUMERIC                             00550000
+                     MOVE "INVALID" TO REMARKS                          00560000
+                  ELSE                                                  00570000
+                     MOVE "VALID" TO REMARKS                            00580000
+                  END-IF                                                00590000
+               END-IF                                                   00600000
+            END-IF.                                                     00610000
+                                                                        00620000
+            EXIT.                                                       00630000
+      *---------------------------------------------------------------- 00640000
+      *--- FIND THE GRADE OF THE STUDENT ------------------------------ 00650000
+      *---------------------------------------------------------------- 00660000
+       PROCESS-PARA.                                                    00670000
+            IF REMARKS = "VALID"                                        00680000
+               EVALUATE TRUE                                            00690000
+                    WHEN PERCENT >= 75                                  00700000
+                         MOVE "DISTN" TO GRADE                          00710000
+                    WHEN PERCENT >= 60 AND PERCENT < 75                 00720000
+                         MOVE "FIRST" TO GRADE                          00730000
+                    WHEN PERCENT >= 50 AND PERCENT < 60                 00740000
+                         MOVE "SECOND" TO GRADE                         00750000
+                    WHEN PERCENT >= 35 AND PERCENT < 50                 00760000
+                         MOVE "THIRD" TO GRADE                          00770000
+                    WHEN OTHER                                          00780000
+                         MOVE "FAIL" TO GRADE                           00790000
+               END-EVALUATE                                             00800000
+            END-IF.                                                     00810000
+                                                                        00820000
+            EXIT.                                                       00830000
+

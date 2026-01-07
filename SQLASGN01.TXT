@@ -1,0 +1,41 @@
+-- ********************************************************************
+-- *** DROP A TABLE
+-- ********************************************************************
+   DROP TABLE STU194;
+   COMMIT;
+
+-- ********************************************************************
+-- *** CREATE A TABLE
+-- ********************************************************************
+   CREATE TABLE STU194
+     (
+         ROLL_NO       SMALLINT      NOT NULL      PRIMARY KEY,
+         STUD_NAME     CHAR(15)      NOT NULL,
+         MOBILE_NO     CHAR(10),
+         TOTAL         SMALLINT,
+         PERCENTAGE    DECIMAL(5,2),
+         CLASS         CHAR(04)
+     ) IN OZA194DB.OZA194TS;
+
+-- ********************************************************************
+-- *** CREATE AN INDEX FOR PRIMARY KEY
+-- ********************************************************************
+   CREATE UNIQUE INDEX IDX_02 ON STU194(ROLL_NO);
+   COMMIT;
+
+-- ********************************************************************
+-- *** INSERT ROWS IN THE TABLE
+-- ********************************************************************
+   INSERT INTO STU194 VALUES(101,'RAKESH',8374351594,88,99,89,
+                                 NULL,NULL,NULL);
+   INSERT INTO STU194 VALUES(102,'ANIL',9640887229,45,45,34,
+                                 NULL,NULL,NULL);
+   INSERT INTO STU194 VALUES(103,'KALYAN',8934983489,98,43,65,
+                                 NULL,NULL,NULL);
+   INSERT INTO STU194 VALUES(104,'RAMESH',NULL,98,43,65,
+                                 NULL,NULL,NULL);
+-- ********************************************************************
+-- *** DISPLAY ALL ROWS OF THE TABLE
+-- ********************************************************************
+   SELECT * FROM STU194;
+

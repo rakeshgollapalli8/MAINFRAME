@@ -1,0 +1,142 @@
+      *----------------------------------------------------------------
+      *--- COPY ROWS FROM TABLE TO TABLE ------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ASGN04.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+      *--- PLUG-IN DCLGEN MEMBER OF MASTER TABLE ----------------------
+           EXEC SQL
+                INCLUDE STUMAST
+           END-EXEC.
+
+      *--- PLUG-IN DCLGEN MEMBER OF TRANSACTION TABLE -----------------
+           EXEC SQL
+                INCLUDE STUTRAN
+           END-EXEC.
+
+      *--- PLUG-IN SQLCA MEMBER ---------------------------------------
+           EXEC SQL
+                INCLUDE SQLCA
+           END-EXEC.
+
+      *--- DECLARE THE CURSOR -----------------------------------------
+           EXEC SQL
+                DECLARE CUR01 CURSOR FOR SELECT ROLL_NO,
+                                                STUD_NAME,
+                                                MKS_1,
+                                                MKS_2,
+                                                MKS_3
+                                           FROM STUD_MASTER
+                                      WHERE STUD_NAME IS NOT NULL
+           END-EXEC.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : ASGN04".
+           DISPLAY " ".
+
+           EXEC SQL
+                DELETE FROM STUD_TRANS
+           END-EXEC.
+           EXEC SQL
+                COMMIT
+           END-EXEC.
+
+           PERFORM 1000-OPEN-PARA.
+
+           PERFORM 2000-FETCH-PARA.
+           PERFORM 3000-STUDENT-PARA UNTIL SQLCODE = 100.
+
+           PERFORM 4000-CLOSE-PARA.
+
+           DISPLAY "THANK YOU FOR USING PROGRAM ASGN04".
+           GOBACK.
+      *----------------------------------------------------------------
+      *--- OPEN THE CURSOR --------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           EXEC SQL
+                OPEN CUR01
+           END-EXEC.
+           DISPLAY "CUR01 CURSOR OPEN STATUS : ", SQLCODE.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- FETCH THE ROW FROM MASTER TABLE ----------------------------
+      *----------------------------------------------------------------
+       2000-FETCH-PARA.
+           EXEC SQL
+                FETCH CUR01 INTO :HV-12ROLL-NO,
+                                 :HV-12STUD-NAME,
+                                 :HV-12MKS-1,
+                                 :HV-12MKS-2,
+                                 :HV-12MKS-3
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS THE STUDENT DETAILS -------------------------------
+      *----------------------------------------------------------------
+       3000-STUDENT-PARA.
+           PERFORM 3100-PROCESS-PARA.
+           PERFORM 2000-FETCH-PARA.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PERFORM CALCULATIONS AND OTHER OPERATIONS ------------------
+      *----------------------------------------------------------------
+       3100-PROCESS-PARA.
+           MOVE    HV-12ROLL-NO       TO   HV-13ROLL-NO.
+           MOVE    HV-12MKS-1         TO   HV-13MKS-1.
+           MOVE    HV-12MKS-2         TO   HV-13MKS-2.
+           MOVE    HV-12MKS-3         TO   HV-13MKS-3.
+           COMPUTE HV-13TOTAL = HV-13MKS-1 + HV-13MKS-2 + HV-13MKS-3.
+           COMPUTE HV-13PERCENT  = HV-13TOTAL / 3.
+      *----------------------------------------------------------------
+
+           EVALUATE TRUE
+                    WHEN HV-13MKS-1  < 35 AND HV-13MKS-2 < 35 AND
+                    HV-13MKS-3 < 35
+                         MOVE "PASS" TO HV-13CLAS
+                    WHEN OTHER
+                         MOVE "FAIL" TO HV-13CLAS
+           END-EVALUATE
+
+           EXEC SQL
+                INSERT INTO STUD_TRANS VALUES(:HV-13ROLL-NO,
+                                             :HV-13MKS-1,
+                                             :HV-13MKS-2,
+                                             :HV-13MKS-3,
+                                             :HV-13TOTAL,
+                                             :HV-13PERCENT,
+                                             :HV-13CLAS)
+
+           END-EXEC.
+           EVALUATE TRUE
+               WHEN SQLCODE = 0
+                    DISPLAY HV-13ROLL-NO, " INSERTED IN EMP_TRANS TABLE"
+               WHEN SQLCODE = -803
+                    DISPLAY HV-13ROLL-NO, " ALREADY EXISTS"
+               WHEN OTHER
+                    DISPLAY HV-13ROLL-NO, " INSERT ERROR : ", SQLCODE
+           END-EVALUATE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE CURSOR -------------------------------------------
+      *----------------------------------------------------------------
+       4000-CLOSE-PARA.
+           EXEC SQL
+                CLOSE CUR01
+           END-EXEC.
+           DISPLAY " ".
+           DISPLAY "CUR01 CURSOR CLOSE STATUS : ", SQLCODE.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+

@@ -1,0 +1,129 @@
+      *----------------------------------------------------------------
+      *--- COPY ROWS FROM TABLE TO TABLE ------------------------------
+      *--- HANDLE NULL COLUMN IN A PROGRAM ----------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. DB2PGM09.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       77  PROJECT-IV-I           PIC S9(04) COMP.
+       77  PROJECT-IV-O           PIC S9(04) COMP.
+
+           EXEC SQL
+                INCLUDE TBLINP
+           END-EXEC.
+
+           EXEC SQL
+                INCLUDE TBLOUT
+           END-EXEC.
+
+           EXEC SQL
+                INCLUDE SQLCA
+           END-EXEC.
+
+           EXEC SQL
+                DECLARE CUR01 CURSOR FOR SELECT EMP_NO,
+                                                EMP_NAME,
+                                                PROJECT
+                                           FROM INPUT_TABLE
+           END-EXEC.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGICS STARTS HERE ---------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : DB2PGM09".
+           DISPLAY " ".
+
+           EXEC SQL
+                DELETE FROM OUTPUT_TABLE
+           END-EXEC.
+           EXEC SQL
+                COMMIT
+           END-EXEC.
+
+           PERFORM 1000-OPEN-PARA.
+
+           PERFORM 2000-FETCH-PARA.
+           PERFORM 3000-COPY-PARA UNTIL SQLCODE = 100.
+
+           PERFORM 4000-CLOSE-PARA.
+
+           DISPLAY "THANK YOU FOR USING PROGRAM DB2PGM09".
+           GOBACK.
+      *----------------------------------------------------------------
+      *--- OPEN THE CURSOR --------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           EXEC SQL
+                OPEN CUR01
+           END-EXEC.
+           DISPLAY "CUR01 CURSOR OPEN STATUS : ", SQLCODE.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- FETCH THE ROW FROM INPUT TABLE -----------------------------
+      *----------------------------------------------------------------
+       2000-FETCH-PARA.
+           EXEC SQL
+                FETCH CUR01 INTO :HV-I-EMP-NO,
+                                 :HV-I-EMP-NAME,
+                                 :HV-I-PROJECT:PROJECT-IV-I
+           END-EXEC.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS THE ROWS OF INPUT TABLE ----------------------------
+      *----------------------------------------------------------------
+       3000-COPY-PARA.
+           PERFORM 3100-PROCESS-PARA.
+           PERFORM 2000-FETCH-PARA.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- COPY ROWS FROM INPUT TABLE TO OUTPUT TABLE -----------------
+      *----------------------------------------------------------------
+       3100-PROCESS-PARA.
+           MOVE HV-I-EMP-NO    TO   HV-O-EMP-NO.
+           MOVE HV-I-EMP-NAME  TO   HV-O-EMP-NAME.
+
+      *--- CODE TO INSERT NULL VALUE IN A NULL COLUMN -----------------
+           EVALUATE TRUE
+               WHEN PROJECT-IV-I = 0
+                    MOVE HV-I-PROJECT TO HV-O-PROJECT
+                    MOVE 0            TO PROJECT-IV-O
+               WHEN PROJECT-IV-I = -1
+                    MOVE -1           TO PROJECT-IV-O
+           END-EVALUATE.
+      *----------------------------------------------------------------
+
+           EXEC SQL
+             INSERT INTO OUTPUT_TABLE VALUES(:HV-O-EMP-NO,
+                                             :HV-O-EMP-NAME,
+                                             :HV-O-PROJECT:PROJECT-IV-O)
+           END-EXEC.
+           EVALUATE TRUE
+                WHEN SQLCODE = 0
+                     DISPLAY HV-O-EMP-NO, " HAS BEEN COPIED"
+                WHEN SQLCODE = -803
+                     DISPLAY HV-O-EMP-NO, " ALREADY EXISTS"
+                WHEN OTHER
+                     DISPLAY HV-O-EMP-NO, " INSERT ERROR : ", SQLCODE
+           END-EVALUATE.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE CURSOR -------------------------------------------
+      *----------------------------------------------------------------
+       4000-CLOSE-PARA.
+           EXEC SQL
+                CLOSE CUR01
+           END-EXEC.
+           DISPLAY " ".
+           DISPLAY "CUR01 CURSOR CLOSE STATUS : ", SQLCODE.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+
