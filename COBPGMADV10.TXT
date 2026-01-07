@@ -1,0 +1,87 @@
+      *----------------------------------------------------------------
+      *--- SEARCH FOR A RECORD IN KSDS & DISPLAY DETAILS OF THE RECORD-
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM10.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT KSDS-FILE ASSIGN TO DD01
+           ORGANIZATION IS INDEXED
+           ACCESS MODE IS RANDOM
+           RECORD KEY IS EMP-NO-KSDS
+           FILE STATUS IS FS-KSDS.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+
+       FILE SECTION.
+       FD  KSDS-FILE
+           LABEL RECORDS ARE STANDARD.
+       01  KSDS-RB.
+           05     EMP-NO-KSDS      PIC 9(03).
+           05     FILLER           PIC X(77).
+
+       WORKING-STORAGE SECTION.
+
+      *---PLUG-IN CODE OF EMPLOYEE-WS RECORD DEFINITION-----------------
+          COPY WSREC.
+
+      *---PLUG-IN CODE OF EMPLOYEE-FRM-RECORD DEFINITION---------------
+          COPY FRMREC.
+
+       77         FS-KSDS          PIC X(02)     VALUE SPACES.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO COBOL PROGRAM : COBPGM10".
+           DISPLAY " ".
+
+           PERFORM 1000-OPEN-PARA.
+
+           ACCEPT EMP-NO-KSDS.
+           READ KSDS-FILE INTO EMPLOYEE-WS.
+           EVALUATE TRUE
+                WHEN FS-KSDS = "00"
+                     MOVE EMP-NO-WS    TO EMP-NO-FRM-WS
+                     MOVE EMP-NAME-WS  TO EMP-NAME-FRM-WS
+                     MOVE PROJECT-WS   TO PROJECT-FRM-WS
+                     MOVE MOBILE-NO-WS TO MOBILE-NO-FRM-WS
+                     MOVE SALARY-WS    TO SALARY-FRM-WS
+
+                     INSPECT EMP-NAME-FRM-WS REPLACING ALL "-" BY " "
+                     INSPECT PROJECT-FRM-WS REPLACING ALL "-" BY " "
+
+                     DISPLAY EMPLOYEE-FRM-WS
+                WHEN FS-KSDS = "23"
+                     DISPLAY EMP-NO-KSDS, " NOT FOUND IN KSDS"
+                WHEN OTHER
+                     DISPLAY EMP-NO-KSDS, " READ ERROR : ", FS-KSDS
+           END-EVALUATE.
+
+           PERFORM 2000-CLOSE-PARA.
+
+           DISPLAY "THANK YOU FOR USING PROGRAM COBPGM10".
+           STOP RUN.
+      *----------------------------------------------------------------
+      *--- OPEN THE FILE ----------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           OPEN INPUT KSDS-FILE.
+           DISPLAY "KSDS OPEN STATUS : ", FS-KSDS.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE FILE ---------------------------------------------
+      *----------------------------------------------------------------
+       2000-CLOSE-PARA.
+           CLOSE KSDS-FILE.
+           DISPLAY " ".
+           DISPLAY "KSDS CLOSE STATUS : ", FS-KSDS.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+

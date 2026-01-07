@@ -1,0 +1,166 @@
+      *----------------------------------------------------------------
+      *---  WRITE VALID   RECORDS IN OUTPUT FILE ----------------------
+      *---  WRITE INVALID RECORDS IN ERROR  FILE ----------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ASSIGN02.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+      *--- ENTRIES FOR INPUT FILE -------------------------------------
+           SELECT PS-IN-FILE ASSIGN TO DD01
+           ORGANIZATION IS SEQUENTIAL
+           FILE STATUS IS FS-PS-IN.
+
+      *--- ENTRIES FOR OUTPUT FILE ------------------------------------
+           SELECT PS-OUT-FILE ASSIGN TO DD02
+           ORGANIZATION IS SEQUENTIAL
+           FILE STATUS IS FS-PS-OUT.
+
+      *--- ENTRIES FOR ERROR FILE -------------------------------------
+           SELECT PS-ERR-FILE ASSIGN TO DD03
+           ORGANIZATION IS SEQUENTIAL
+           FILE STATUS IS FS-PS-ERR.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+
+       FILE SECTION.
+       FD  PS-IN-FILE
+           LABEL RECORDS ARE STANDARD
+           RECORDING MODE IS F.
+       01  INPUT-FILE-RB.
+           05    FILLER        PIC X(80).
+
+       FD  PS-OUT-FILE
+           LABEL RECORDS ARE STANDARD
+           RECORDING MODE IS F.
+       01  OUTPUT-FILE-RB.
+           05    FILLER        PIC X(80).
+
+       FD  PS-ERR-FILE
+           LABEL RECORDS ARE STANDARD
+           RECORDING MODE IS F.
+       01  ERROR-FILE-RB.
+           05    FILLER        PIC X(80).
+
+       WORKING-STORAGE SECTION.
+       01  EMPLOYE-WS.
+           05    EMP-NAME-WS   PIC X(15).
+           05    FILLER        PIC X(01).
+           05    SALARY-WS     PIC 9(06).
+
+       01  OUTPUT-WS.
+           05    E-NAME-WS     PIC X(15).
+           05    FILLER        PIC X(01).
+           05    BASIC-SAL-WS  PIC 9(06).
+           05    FILLER        PIC X(01).
+           05    DA-WS         PIC 9(06).
+           05    FILLER        PIC X(01).
+           05    HRA-WS        PIC 9(06).
+           05    FILLER        PIC X(01).
+           05    GROSS-WS      PIC 9(06).
+
+       77        FS-PS-IN      PIC X(02)         VALUE SPACES.
+       77        FS-PS-OUT     PIC X(02)         VALUE SPACES.
+       77        FS-PS-ERR     PIC X(02)         VALUE SPACES.
+       77        VALID-RECS    PIC 9(02)         VALUE ZERO.
+       77        INVALID-RECS  PIC 9(02)         VALUE ZERO.
+       77        TOTAL-RECS    PIC 9(02)         VALUE ZERO.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : ASSIGN02".
+           DISPLAY " ".
+
+           PERFORM 1000-OPEN-PARA.
+
+      *--- READ THE FIRST RECORD FROM THE FILE ------------------------
+           READ PS-IN-FILE INTO EMPLOYE-WS.
+           PERFORM 2000-EMPLOYE-PARA UNTIL FS-PS-IN = "10".
+
+           PERFORM 3000-CLOSE-PARA.
+
+           PERFORM 4000-SHOW-STATS-PARA.
+
+           DISPLAY "THANK YOU FOR USING PROGRAM ASSIGN02".
+           STOP RUN.
+      *----------------------------------------------------------------
+      *--- OPEN THE FILE ----------------------------------------------
+      *----------------------------------------------------------------
+       1000-OPEN-PARA.
+           OPEN INPUT PS-IN-FILE.
+           DISPLAY "PS-IN-FILE OPEN STATUS  : ", FS-PS-IN.
+
+           OPEN OUTPUT PS-OUT-FILE.
+           DISPLAY "PS-OUT-FILE OPEN STATUS : ", FS-PS-OUT.
+
+           OPEN OUTPUT PS-ERR-FILE.
+           DISPLAY "PS-ERR-FILE OPEN STATUS : ", FS-PS-ERR.
+
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- PROCESS STUDENT RECORD -------------------------------------
+      *----------------------------------------------------------------
+       2000-EMPLOYE-PARA.
+           EVALUATE TRUE
+               WHEN EMP-NAME-WS = SPACES OR SALARY-WS = 0
+                    WRITE ERROR-FILE-RB FROM EMPLOYE-WS
+                    COMPUTE INVALID-RECS = INVALID-RECS + 1
+               WHEN SALARY-WS IS NOT NUMERIC
+                    WRITE ERROR-FILE-RB FROM EMPLOYE-WS
+                    COMPUTE INVALID-RECS = INVALID-RECS + 1
+               WHEN OTHER
+                    PERFORM 2100-PROCESS-PARA
+                    WRITE OUTPUT-FILE-RB FROM OUTPUT-WS
+                    COMPUTE VALID-RECS = VALID-RECS + 1
+           END-EVALUATE.
+           COMPUTE TOTAL-RECS = TOTAL-RECS + 1.
+
+      *--- READ NEXT RECORD FROM THE FILE -----------------------------
+           READ PS-IN-FILE INTO EMPLOYE-WS.
+
+           EXIT.
+      *----------------------------------------------------------------
+      *--- FIND THE GRADE ---------------------------------------------
+      *----------------------------------------------------------------
+       2100-PROCESS-PARA.
+           MOVE EMP-NAME-WS TO E-NAME-WS.
+           MOVE SALARY-WS   TO BASIC-SAL-WS.
+           COMPUTE DA-WS = 0.4 * BASIC-SAL-WS.
+           COMPUTE HRA-WS = 0.1 * BASIC-SAL-WS.
+           COMPUTE GROSS-WS = BASIC-SAL-WS + DA-WS + HRA-WS.
+           EXIT.
+      *----------------------------------------------------------------
+      *--- CLOSE THE FILE ---------------------------------------------
+      *----------------------------------------------------------------
+       3000-CLOSE-PARA.
+           DISPLAY " ".
+
+           CLOSE PS-IN-FILE.
+           DISPLAY "PS-IN-FILE CLOSE STATUS     : ", FS-PS-IN.
+
+           CLOSE PS-OUT-FILE.
+           DISPLAY "PS-OUT-FILE CLOSE STATUS     : ", FS-PS-OUT.
+
+           CLOSE PS-ERR-FILE.
+           DISPLAY "PS-ERR-FILE CLOSE STATUS    : ", FS-PS-ERR.
+
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+      *--- DISPLAY THE STATISTICS -------------------------------------
+      *----------------------------------------------------------------
+       4000-SHOW-STATS-PARA.
+           DISPLAY " ".
+           DISPLAY "TOTAL RECORDS PROCESSED : ", TOTAL-RECS.
+           DISPLAY "TOTAL RECORDS VALID     : ", VALID-RECS.
+           DISPLAY "TOTAL RECORDS INVALID   : ", INVALID-RECS.
+           DISPLAY " ".
+           EXIT.
+      *----------------------------------------------------------------
+

@@ -1,0 +1,56 @@
+      *----------------------------------------------------------------
+      *--- INTRINSIC FUNCTIONS ----------------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM18.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01   EMPLOYEE-RECORD.
+            05     EMP-NAME           PIC X(10).
+            05     FILLER             PIC X(01).
+            05     BIRTH-DATE         PIC 9(08).
+            05     FILLER             PIC X(01).
+            05     AGE                PIC 9(02).
+
+       77          TODAYS-DATE-X      PIC X(08).
+       77          TODAYS-DATE-9      PIC 9(08).
+       77          TODAYS-DATE-G      PIC 9(07).
+       77          BIRTH-DATE-G       PIC 9(07).
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : COBPGM18".
+           DISPLAY " ".
+
+           PERFORM 1000-EMPLOYEE-PARA 5 TIMES.
+
+           DISPLAY " ".
+           DISPLAY "THANK YOU FOR USING PROGRAM COBPGM18".
+           GOBACK.
+      *----------------------------------------------------------------
+      *--- PROCESS EMPLOYEE RECORD ------------------------------------
+      *----------------------------------------------------------------
+       1000-EMPLOYEE-PARA.
+           ACCEPT EMPLOYEE-RECORD.
+
+           MOVE FUNCTION CURRENT-DATE TO TODAYS-DATE-X.
+           MOVE TODAYS-DATE-X TO TODAYS-DATE-9.
+
+           COMPUTE TODAYS-DATE-G =
+                   FUNCTION INTEGER-OF-DATE(TODAYS-DATE-9).
+
+           COMPUTE BIRTH-DATE-G =
+                   FUNCTION INTEGER-OF-DATE(BIRTH-DATE).
+
+           COMPUTE AGE = ( TODAYS-DATE-G - BIRTH-DATE-G ) / 365.
+
+           DISPLAY EMPLOYEE-RECORD.
+           EXIT.
+      *----------------------------------------------------------------
+

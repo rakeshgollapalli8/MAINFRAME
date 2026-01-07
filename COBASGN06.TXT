@@ -1,0 +1,50 @@
+      *----------------------------------------------------------------
+      *--- STRING/ UNSTRING -------------------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ASSIGN06.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01    DATE-RECORD.
+             05       DATE-1     PIC  X(08).
+             05       FILLER     PIC  X(01).
+             05       DATE-2     PIC  X(10).
+
+       77             CTR        PIC  9(01)    VALUE 1.
+       77             DD         PIC  9(02)    VALUE 0.
+       77             MM         PIC  9(02)    VALUE 0.
+       77             YYYY       PIC  9(04)    VALUE 0.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : ASSIGN06".
+           DISPLAY " ".
+
+           PERFORM 1000-DATE-PARA UNTIL CTR = 6.
+
+           DISPLAY " ".
+           DISPLAY "THANK YOU FOR USING PROGRAM ASSIGN06".
+           STOP RUN.
+      *----------------------------------------------------------------
+      *--- CHANGE DATE FORMAT  FROM DD-MM-YYYY TO YYYY-MM-DD ----------
+      *----------------------------------------------------------------
+       1000-DATE-PARA.
+           ACCEPT DATE-RECORD.
+           MOVE DATE-1(1:2) TO DATE-2(1:2). 08122000
+           MOVE "-"         TO DATE-2(3:1). 08-12-2000
+           MOVE DATE-1(3:2) TO DATE-2(4:2).
+           MOVE "-"         TO DATE-2(6:1).
+           MOVE DATE-1(5:4) TO DATE-2(7:4).
+
+
+           DISPLAY DATE-RECORD.
+
+           COMPUTE CTR = CTR + 1.
+           EXIT.
+

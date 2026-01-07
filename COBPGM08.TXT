@@ -1,0 +1,89 @@
+      *----------------------------------------------------------------
+      *--- TABLE HANDLING ---------------------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. COBPGM08.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01   TABLE-1.
+            05   STUDENT-TABLE OCCURS 10 TIMES.
+                 10     STUD-NAME     PIC A(15).
+                 10     FILLER        PIC X(01).
+                 10     PERCENT       PIC 9(03).
+                 10     FILLER        PIC X(01).
+                 10     GRADE         PIC A(06).
+                 10     FILLER        PIC X(01).
+                 10     REMARKS       PIC A(07).
+
+       77   LOCN                      PIC 9(02)    VALUE 1.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       MAIN-PARA.
+            DISPLAY "WELCOME TO MY PROGRAM : COBPGM08".
+            DISPLAY " ".
+
+            PERFORM STUDENT-PARA 10 TIMES.
+
+            DISPLAY " ".
+            DISPLAY "THANK YOU FOR USING PROGRAM COBPGM08".
+            STOP RUN.
+      *----------------------------------------------------------------
+      *--- PROCESS STUDENT DETAILS ------------------------------------
+      *----------------------------------------------------------------
+       STUDENT-PARA.
+            ACCEPT STUDENT-TABLE(LOCN).
+
+            PERFORM VALIDATE-PARA.
+
+            PERFORM PROCESS-PARA.
+
+            DISPLAY STUDENT-TABLE(LOCN).
+            COMPUTE LOCN = LOCN + 1.
+            EXIT.
+      *----------------------------------------------------------------
+      *--- VALIDATE THE INPUT -----------------------------------------
+      *----------------------------------------------------------------
+       VALIDATE-PARA.
+            IF STUD-NAME(LOCN) = SPACES OR PERCENT(LOCN) = 0
+               MOVE "INVALID" TO REMARKS(LOCN)
+            ELSE
+               IF STUD-NAME(LOCN) IS NOT ALPHABETIC
+                  MOVE "INVALID" TO REMARKS(LOCN)
+               ELSE
+                  IF PERCENT(LOCN) IS NOT NUMERIC
+                     MOVE "INVALID" TO REMARKS(LOCN)
+                  ELSE
+                     MOVE "VALID" TO REMARKS(LOCN)
+                  END-IF
+               END-IF
+            END-IF.
+
+            EXIT.
+      *----------------------------------------------------------------
+      *--- FIND THE GRADE OF THE STUDENT ------------------------------
+      *----------------------------------------------------------------
+       PROCESS-PARA.
+            IF REMARKS(LOCN) = "VALID"
+               EVALUATE TRUE
+                    WHEN PERCENT(LOCN) >= 75
+                         MOVE "DISTN" TO GRADE(LOCN)
+                    WHEN PERCENT(LOCN) >= 60 AND PERCENT(LOCN) < 75
+                         MOVE "FIRST" TO GRADE(LOCN)
+                    WHEN PERCENT(LOCN) >= 50 AND PERCENT(LOCN) < 60
+                         MOVE "SECOND" TO GRADE(LOCN)
+                    WHEN PERCENT(LOCN) >= 35 AND PERCENT(LOCN) < 50
+                         MOVE "THIRD" TO GRADE(LOCN)
+                    WHEN OTHER
+                         MOVE "FAIL" TO GRADE(LOCN)
+               END-EVALUATE
+            END-IF.
+
+            EXIT.
+      *----------------------------------------------------------------
+

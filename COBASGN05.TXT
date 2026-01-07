@@ -1,0 +1,53 @@
+      *----------------------------------------------------------------
+      *--- STRING/ UNSTRING -------------------------------------------
+      *----------------------------------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ASSIGN05.
+      *----------------------------------------------------------------
+       ENVIRONMENT DIVISION.
+      *----------------------------------------------------------------
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01    DATE-RECORD.
+             05       FULL-NAME1 PIC  X(30).
+             05       FILLER     PIC  X(01).
+             05       FULL-NAME2 PIC  X(30).
+
+       77             CTR        PIC  9(01)    VALUE 1.
+       77             F-NA       PIC  X(10)    VALUE SPACES.
+       77             M-NA       PIC  X(10)    VALUE SPACES.
+       77             SU-NA      PIC  X(10)    VALUE SPACES.
+      *----------------------------------------------------------------
+       PROCEDURE DIVISION.
+      *----------------------------------------------------------------
+      *--- PROGRAM LOGIC STARTS HERE ----------------------------------
+      *----------------------------------------------------------------
+       0000-MAIN-PARA.
+           DISPLAY "WELCOME TO MY PROGRAM : ASSIGN05".
+           DISPLAY " ".
+
+           PERFORM 1000-DATE-PARA UNTIL CTR = 2.
+
+           DISPLAY " ".
+           DISPLAY "THANK YOU FOR USING PROGRAM ASSIGN05".
+           STOP RUN.
+      *----------------------------------------------------------------
+      *--- CHANGE DATE FORMAT  FROM DD-MM-YYYY TO MM/DD/YYYY ----------
+      *----------------------------------------------------------------
+       1000-DATE-PARA.
+           ACCEPT DATE-RECORD.
+
+           UNSTRING FULL-NAME1 DELIMITED BY " " INTO F-NA, M-NA, SU-NA.
+
+           STRING  SU-NA    DELIMITED BY " "
+                   " "      DELIMITED BY SIZE
+                   F-NA     DELIMITED BY " "
+                   " "      DELIMITED BY SIZE
+                   M-NA     DELIMITED BY " "
+             INTO  FULL-NAME2.
+
+           DISPLAY DATE-RECORD.
+
+           COMPUTE CTR = CTR + 1.
+           EXIT.
+
